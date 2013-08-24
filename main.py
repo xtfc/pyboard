@@ -13,6 +13,8 @@ import zipfile
 import subprocess
 import glob
 import shutil
+import smtplib
+from email.mime.text import MIMEText
 
 app = Flask(__name__)
 
@@ -94,6 +96,18 @@ def upload():
 			pass
 		full_path = upload_dir + filename
 		ufile.save(full_path)
+
+		verification_code = sha.new(name+'_'+assignment).hexdigest()
+		msg = MIMEText("Your submission for assignment `" + assignment + "' was received.\n\nYour confirmation code is " + verification_code)
+		me = 'submission@leiyu5.cs.binghamton.edu'
+		you = name + '@binghamton.edu'
+		msg['Subject'] = 'Submission received'
+		msg['From'] = me
+		msg['To'] = you
+		s = smtplib.SMTP('localhost')
+		s.sendmail(me, [you], msg.as_string())
+		s.quit()
+
 		output = handle_file(full_path)
 		return render_template('upload.html', name=name,
 						      filename=filename,
