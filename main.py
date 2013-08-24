@@ -135,14 +135,6 @@ def download(section, assignment):
 		else:
 			return "wrong password"
 
-@app.route('/blog/')
-def blogbase():
-	return send_from_directory('blog', 'index.html')
-
-@app.route('/blog/<path:rest>')
-def blog(rest):
-	return send_from_directory('blog', rest)
-
 
 if __name__ == '__main__':
 #	app.debug = True
