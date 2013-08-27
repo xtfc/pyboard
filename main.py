@@ -1,4 +1,4 @@
-from flask import Flask, redirect
+from flask import Flask, redirect, session
 from flask import request
 from flask import render_template
 from flask import make_response
@@ -16,9 +16,16 @@ import shutil
 import smtplib
 import re
 import random
+try:
+	import ldap
+except:
+	print "ldap not loaded"
 from email.mime.text import MIMEText
 
+import serverconfig
+
 app = Flask(__name__)
+app.secret_key = serverconfig.app_secret_key
 
 def handle_file(file_path):
 	return_string = ""
@@ -194,6 +201,39 @@ def confirm(name, code):
 			return redirect("/emails")
 	except: pass
 	return "no"
+
+@app.route('/grades/', methods=['GET', 'POST'])
+def grades_login():
+	if request.method == 'GET':
+		return "<form method=\"POST\" action=\"/grades/\"><label for=\"username\">pods id</label><input type=\"text\" name=\"username\" /><br /><label for=\"pw\">password</label><input type=\"password\" name=\"pw\" /><br /><input type=\"submit\" />"
+	else:
+		username = request.form['username']
+		pw = request.form['pw']
+		server = serverconfig.ldap_server
+		con = ldap.initialize(server)
+		dn = serverconfig.make_dn(username)
+		rv = con.simple_bind(dn, pw)
+		try:
+			r = con.result(rv)
+			if r[0] == 97:
+				session['username'] = username
+				return redirect("/grades/"+username)
+		except: pass
+		return "nopenope"
+
+@app.route('/grades/<user>')
+def grades_show(user):
+	if 'username' not in session:
+		return "nope"
+	logged_in_as = session['username']
+	if logged_in_as != user:
+		return "nope"
+	return user
+
+@app.route('/grades/logout')
+def grades_logout():
+	session.pop('username', None)
+	return redirect("/grades")
 
 if __name__ == '__main__':
 #	app.debug = True

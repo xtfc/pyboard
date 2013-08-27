@@ -1,0 +1,4 @@
+app_secret_key = '-'
+ldap_server = "ldap://127.0.0.1:389"
+def make_dn(username):
+	return "cn=" + username + ",cn=users,dc=ldap,dc=ldap,dc=ldap"

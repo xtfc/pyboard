@@ -4,3 +4,4 @@ venv/
 static/
 files/
 emails/
+serverconfig.py
