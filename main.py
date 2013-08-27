@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, redirect
 from flask import request
 from flask import render_template
 from flask import make_response
@@ -14,6 +14,8 @@ import subprocess
 import glob
 import shutil
 import smtplib
+import re
+import random
 from email.mime.text import MIMEText
 
 app = Flask(__name__)
@@ -149,6 +151,49 @@ def download(section, assignment):
 		else:
 			return "wrong password"
 
+@app.route('/emails/')
+def email():
+	output = subprocess.check_output("ls emails", shell=True).rstrip()
+	userids = re.split('\n', output)
+	html = ""
+	for id in userids:
+		email = subprocess.check_output("head -n 1 emails/" + id, shell=True).rstrip()
+		html += id + " <a href=\"/emails/edit/" + id + "\">" + email + "</a><br />"
+	return html
+
+@app.route('/emails/edit/<name>', methods=['GET', 'POST'])
+def edit(name):
+	if request.method == 'GET':
+		return "<form method=\"POST\" action=\"/emails/edit/"+name+"\"><label for=\"email\">new email:</label><input type=\"text\" name=\"email\" /><input type=\"submit\" /></form>- a confirmation email will be sent to your old email address after submission"
+	if request.method == 'POST':
+		requested_email = request.form['email']
+		old_email = subprocess.check_output("head -n 1 emails/" + name, shell=True).rstrip()
+		subprocess.call("echo \"" + old_email + "\n" + requested_email + "\" > emails/" + name, shell=True)
+
+		# send an email confirmation
+		verification_code = sha.new(str(random.randint(0, 1000000))).hexdigest()
+		subprocess.call("echo " + verification_code + " >> emails/"+name, shell=True)
+		msg = MIMEText(name +", your request to change your email address to " + requested_email + " was received.\n\nFollow this link to confirm this action http://leiyu5.cs.binghamton.edu/emails/edit/"+name+"/" + verification_code)
+		me = 'emailchange@leiyu5.cs.binghamton.edu'
+		you = old_email
+		msg['Subject'] = 'Submission received'
+		msg['From'] = me
+		msg['To'] = you
+		s = smtplib.SMTP('localhost')
+		s.sendmail(me, [you], msg.as_string())
+		s.quit()
+
+		return redirect("/emails")
+
+@app.route('/emails/edit/<name>/<code>')
+def confirm(name, code):
+	lines = re.split('\n', subprocess.check_output("cat emails/" + name, shell=True).rstrip())
+	try:
+		if lines[2] == code:
+			subprocess.call("echo " + lines[1] + " > emails/" + name, shell=True)
+			return redirect("/emails")
+	except: pass
+	return "no"
 
 if __name__ == '__main__':
 #	app.debug = True
