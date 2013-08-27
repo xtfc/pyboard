@@ -31,7 +31,11 @@
       <input type="hidden" name="MAX_FILE_SIZE" value="5000000" />
       Your Binghamton user ID (e.g. pdexter1): <input name="id" type="text" /><br />
       Your section: <select name="section"><option value="a0" selected="selected">a0 (Lander)</option><option value="b1">b1 (Williams)</option></select><br />
-      Submitting for: <select name="ass"><option value="test" selected="selected">test</option><option value="final_project">final_project</option><option value="assignment13">assignment13</option><option value="assignment12">assignment12</option><option value="assignment11">assignment11</option><option value="lab10">lab10</option><option value="lab09">lab09</option><option value="assignment10">assignment10</option><option value="assignment09">assignment09</option><option value="paper">paper</option><option value="assignment08">assignment08</option><option value="assignment07">assignment07</option><option value="lab07">lab07</option><option value="assignment06">assignment06</option><option value="lab06">lab06</option><option value="assignment05">assignment05</option><option value="lab05">lab05</option><option value="prelab5">prelab5</option><option value="assignment04">assignment04</option><option value="lab04">lab04</option><option value="assignment03">assignment03</option><option value="lab03">lab03</option><option value="assignment02">assignment02</option><option value="lab02">lab02</option><option value="assignment01">assignment01</option><option value="lab01">lab01</option><option value="test">test</option></select><br />
+      Submitting for: <select name="ass">
+        {% for item in assignments %}
+            <option value="{{ item }}">{{ item }}</option>
+        {% endfor %}
+      </select><br />
       Choose a file to upload: <input name="file" type="file" /><br />
       <input type="submit" value="Submit" />
     </form>

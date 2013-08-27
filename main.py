@@ -124,7 +124,8 @@ def upload():
 						      assignment=assignment,
 						      output=output)
 	else:
-		return render_template('index.html')
+		assignments = re.split('\n', subprocess.check_output("tac assignments", shell=True).rstrip())
+		return render_template('index.html', assignments=assignments)
 
 def get_submissions(section, assignment):
 	pdir = os.path.abspath(os.curdir)
