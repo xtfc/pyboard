@@ -267,8 +267,3 @@ def grades_show(user):
 def grades_logout():
 	session.pop('username', None)
 	return redirect("/grades")
-
-if __name__ == '__main__':
-#	app.debug = True
-#	app.run(host='127.0.0.1', port=3444)
-	app.run(host='0.0.0.0', port=80)
