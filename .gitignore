@@ -4,5 +4,6 @@ venv/
 static/
 files/
 emails/
+grades/
 serverconfig.py
 assignments

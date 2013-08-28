@@ -4,6 +4,8 @@ echo "creating static files directory..."
 mkdir static
 echo "creating emails directory..."
 mkdir emails
+echo "creating a grades directory..."
+mkdir grades
 echo "creating a blank assignments file..."
 touch assignments
 echo "creating a default serverconfig.py..."
