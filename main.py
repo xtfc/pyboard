@@ -175,7 +175,7 @@ def edit(name):
 		return "<form method=\"POST\" action=\"/emails/edit/"+name+"\"><label for=\"email\">new email:</label><input type=\"text\" name=\"email\" /><input type=\"submit\" /></form>- a confirmation email will be sent to your old email address after submission"
 	if request.method == 'POST':
 		requested_email = request.form['email']
-		old_email = subprocess.check_output("head -n 1 emails/" + name, shell=True).rstrip()
+		old_email = subprocess.check_output("head -n 2 emails/" + name, shell=True).rstrip()
 		subprocess.call("echo \"" + old_email + "\n" + requested_email + "\" > emails/" + name, shell=True)
 
 		# send an email confirmation
@@ -197,8 +197,8 @@ def edit(name):
 def confirm(name, code):
 	lines = re.split('\n', subprocess.check_output("cat emails/" + name, shell=True).rstrip())
 	try:
-		if lines[2] == code:
-			subprocess.call("echo " + lines[1] + " > emails/" + name, shell=True)
+		if lines[3] == code:
+			subprocess.call("echo \"" + lines[2] + "\n" + lines[1] + "\" > emails/" + name, shell=True)
 			return redirect("/emails")
 	except: pass
 	return "no"
