@@ -203,10 +203,30 @@ def confirm(name, code):
 	except: pass
 	return "no"
 
+@app.route('/emails/to/<to>', methods=['GET', 'POST'])
+def email_to(to):
+	if request.method == 'GET':
+		return "<form method=\"POST\" action=\"/emails/to/"+to+"\"><label for=\"from\">from</label><input type=\"text\" name=\"from\" /><br /><label for=\"subject\">subject</label><input type=\"text\" name=\"subject\" size=50 /><br /><label for=\"body\" style=\"float:left\">body</label><textarea name=\"body\" style=\"width: 80%\" rows=20></textarea><br /><input type=\"submit\" /></form>"
+	else:
+		msg = MIMEText(request.form['body'])
+		me = request.form['from']
+		yous = []
+		output = subprocess.check_output("ls emails", shell=True).rstrip()
+		userids = re.split('\n', output)
+		for id in userids:
+			email = subprocess.check_output("head -n 1 emails/" + id, shell=True).rstrip()
+			yous.append(email)
+		msg['Subject'] = request.form['subject']
+		msg['From'] = me
+		msg['To'] = ", ".join(yous)
+		s = smtplib.SMTP('localhost')
+		s.sendmail(me, yous, msg.as_string())
+		return "message sent successfully"
+
 @app.route('/grades/', methods=['GET', 'POST'])
 def grades_login():
 	if request.method == 'GET':
-		return "<form method=\"POST\" action=\"/grades/\"><label for=\"username\">pods id</label><input type=\"text\" name=\"username\" /><br /><label for=\"pw\">password</label><input type=\"password\" name=\"pw\" /><br /><input type=\"submit\" />"
+		return "<form method=\"POST\" action=\"/grades/\"><label for=\"username\">pods id</label><input type=\"text\" name=\"username\" /><br /><label for=\"pw\">password</label><input type=\"password\" name=\"pw\" /><br /><input type=\"submit\" /></form>"
 	else:
 		username = request.form['username']
 		pw = request.form['pw']
