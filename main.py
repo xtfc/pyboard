@@ -249,7 +249,16 @@ def grades_show(user):
 	logged_in_as = session['username']
 	if logged_in_as != user:
 		return "nope"
-	return user
+	grades = re.split('\n', subprocess.check_output("cat grades/"+user, shell=True).rstrip())
+	html = "<table border=\"1\">"
+	html += "<tr><td>Assignment</td><td>Grade</td></tr>"
+	for g in grades:
+		formatted = re.split('\t', g)
+		html += "<tr>"
+		html += "<td>" + formatted[0] + "</td><td>" + formatted[1] + "</td>"
+		html += "</tr>"
+	html += "</table>"
+	return html
 
 @app.route('/grades/logout')
 def grades_logout():
