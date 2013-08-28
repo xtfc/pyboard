@@ -184,7 +184,7 @@ def edit(name):
 		msg = MIMEText(name +", your request to change your email address to " + requested_email + " was received.\n\nFollow this link to confirm this action http://leiyu5.cs.binghamton.edu/emails/edit/"+name+"/" + verification_code)
 		me = 'emailchange@leiyu5.cs.binghamton.edu'
 		you = old_email
-		msg['Subject'] = 'Submission received'
+		msg['Subject'] = 'Email Change Verification'
 		msg['From'] = me
 		msg['To'] = you
 		s = smtplib.SMTP('localhost')
