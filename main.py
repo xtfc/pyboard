@@ -214,8 +214,11 @@ def email_to(to):
 		output = subprocess.check_output("ls emails", shell=True).rstrip()
 		userids = re.split('\n', output)
 		for id in userids:
-			email = subprocess.check_output("head -n 1 emails/" + id, shell=True).rstrip()
-			yous.append(email)
+			lines = re.split('\n', subprocess.check_output("head -n 2 emails/" + id, shell=True).rstrip())
+			email = lines[0]
+			section = lines[1]
+			if to == 'a0' or to == section:
+				yous.append(email)
 		msg['Subject'] = request.form['subject']
 		msg['From'] = me
 		msg['To'] = ", ".join(yous)
