@@ -224,6 +224,7 @@ def email_to(to):
 		msg['To'] = ", ".join(yous)
 		s = smtplib.SMTP('localhost')
 		s.sendmail(me, yous, msg.as_string())
+		s.quit()
 		return "message sent successfully"
 
 @app.route('/grades/', methods=['GET', 'POST'])
