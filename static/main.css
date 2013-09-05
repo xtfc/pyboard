@@ -40,3 +40,7 @@ nav > ul > li > a {
 nav > ul > li > a:hover {
 	color: hsl(240, 100%, 30%);
 }
+
+h1, h2, h3, h4, h5, h6 {
+	text-align: center;
+}

@@ -1,5 +1,6 @@
 # Flask imports
-from flask import Flask, redirect, session
+from flask import Flask
+from flask import abort, redirect, session
 from flask import make_response
 from flask import render_template
 from flask import request
@@ -238,17 +239,21 @@ def grades_login():
 			r = con.result(rv)
 			if r[0] == 97:
 				session['username'] = username
-				return redirect("/grades/"+username)
-		except: pass
-		return "nopenope"
+				return redirect("/grades/" + username)
+		except:
+			pass
+
+		return abort(403)
 
 @app.route('/grades/<user>')
 def grades_show(user):
 	if 'username' not in session:
-		return "nope"
+		return abort(403)
+
 	logged_in_as = session['username']
 	if logged_in_as != user:
-		return "nope"
+		return abort(403)
+
 	grades = re.split('\n', subprocess.check_output("cat grades/"+user, shell=True).rstrip())
 	html = "<table border=\"1\">"
 	html += "<tr><td>Assignment</td><td>Grade</td></tr>"
@@ -264,6 +269,22 @@ def grades_show(user):
 def grades_logout():
 	session.pop('username', None)
 	return redirect("/grades")
+
+@app.errorhandler(400)
+@app.errorhandler(401)
+@app.errorhandler(403)
+@app.errorhandler(404)
+@app.errorhandler(500)
+def view_error(error):
+	try:
+		return render_template('error.html',
+			error = '{} Error'.format(error.code),
+			desc = error.description), error.code
+
+	except:
+		return render_template('error.html',
+			error = 'Oh my',
+			desc = 'Something went wrong.')
 
 def send_email(me = None, you = None, subject = 'Notification', body = None):
 	if not me:
