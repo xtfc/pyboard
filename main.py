@@ -114,15 +114,10 @@ def upload():
 		ufile.save(full_path)
 
 		verification_code = sha.new(name+'_'+assignment).hexdigest()
-		msg = MIMEText("Your submission for assignment `" + assignment + "' was received.\n\nYour confirmation code is " + verification_code)
-		me = 'submission@leiyu5.cs.binghamton.edu'
-		you = name + '@binghamton.edu'
-		msg['Subject'] = 'Submission received'
-		msg['From'] = me
-		msg['To'] = you
-		s = smtplib.SMTP('localhost')
-		s.sendmail(me, [you], msg.as_string())
-		s.quit()
+		# FIXME template
+		send_email(you = name + '@binghamton.edu',
+			subject = 'Submission Received',
+			body = "Your submission for assignment `" + assignment + "' was received.\n\nYour confirmation code is " + verification_code)
 
 		output = handle_file(full_path)
 		return render_template('upload.html', title='Upload',
@@ -188,7 +183,9 @@ def edit(name):
 		subprocess.call("echo " + verification_code + " >> emails/"+name, shell=True)
 
 		# FIXME template and actually linkify the text
-		send_email(you = old_email, subject = 'Email Change Verification', body = name + ", your request to change your email address to " + requested_email + " was received.\n\nFollow this link to confirm this action http://leiyu5.cs.binghamton.edu/emails/edit/"+name+"/" + verification_code)
+		send_email(you = old_email,
+			subject = 'Email Change Verification',
+			body = name + ", your request to change your email address to " + requested_email + " was received.\n\nFollow this link to confirm this action http://leiyu5.cs.binghamton.edu/emails/edit/"+name+"/" + verification_code)
 
 		return redirect("/emails")
 
@@ -208,8 +205,6 @@ def email_to(to):
 	if request.method == 'GET':
 		return render_template('compose.html')
 	else:
-		msg = MIMEText(request.form['body'])
-		me = request.form['from']
 		yous = []
 
 		users = sorted(os.listdir('emails'))
@@ -221,12 +216,11 @@ def email_to(to):
 			if to == 'a0' or to == section:
 				yous.append(email)
 
-		msg['Subject'] = request.form['subject']
-		msg['From'] = me
-		msg['To'] = ", ".join(yous)
-		s = smtplib.SMTP('localhost')
-		s.sendmail(me, yous, msg.as_string())
-		s.quit()
+		send_email(me = request.form['from'],
+			you = yous,
+			subject = request.form['subject'],
+			body = request.form['body'])
+
 		return "message sent successfully"
 
 @app.route('/grades/', methods=['GET', 'POST'])
@@ -289,13 +283,16 @@ def send_email(me = None, you = None, subject = 'Notification', body = None):
 	if not you or not body:
 		return
 
+	if type(you) is str:
+		you = [you]
+
 	message = MIMEText(body)
 	message['Subject'] = subject
 	message['From'] = me
-	message['To'] = you
+	message['To'] = ', '.join(you)
 
 	s = smtplib.SMTP('localhost')
-	s.sendmail(me, [you], message.as_string())
+	s.sendmail(me, you, message.as_string())
 	s.quit()
 
 if __name__ == '__main__':
