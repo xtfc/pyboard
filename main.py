@@ -103,10 +103,12 @@ def upload():
 		d = datetime.now()
 		time_stamp = d.strftime("%Y-%m-%d-%H-%M-%S")
 		upload_dir = "files/" + "/" + section + "/" + assignment + "/" + name + "/" + time_stamp + "/"
+
 		try:
 			os.makedirs(upload_dir)
 		except:
-			pass
+			pass # uhh wat FIXME
+
 		full_path = upload_dir + filename
 		ufile.save(full_path)
 
@@ -128,7 +130,7 @@ def upload():
 						      assignment=assignment,
 						      output=output)
 	else:
-		assignments = re.split('\n', subprocess.check_output("tac assignments", shell=True).rstrip())
+		assignments = sorted([line.strip() for line in open('assignments') if line.strip()])
 		return render_template('index.html', assignments=assignments)
 
 def get_submissions(section, assignment):
