@@ -125,14 +125,15 @@ def upload():
 		s.quit()
 
 		output = handle_file(full_path)
-		return render_template('upload.html', name=name,
-						      filename=filename,
-						      section=section,
-						      assignment=assignment,
-						      output=output)
+		return render_template('upload.html', title='Upload',
+			name=name,
+			filename=filename,
+			section=section,
+			assignment=assignment,
+			output=output)
 	else:
 		assignments = sorted([line.strip() for line in open('assignments') if line.strip()])
-		return render_template('index.html', assignments=assignments)
+		return render_template('index.html', title='Submit', assignments=assignments)
 
 def get_submissions(section, assignment):
 	pdir = os.path.abspath(os.curdir)
@@ -156,21 +157,22 @@ def get_submissions(section, assignment):
 @app.route('/download/<section>/<assignment>', methods=['GET', 'POST'])
 def download(section, assignment):
 	if request.method == 'GET':
+		# FIXME #5, #7
 		return "<form method=\"POST\" action=/download/"+section+"/"+assignment+"><input type=\"password\" name=\"password\" /></form>"
 	else:
 		if sha.new(request.form['password']).hexdigest() == '3c580cd7d19aeb7f8b70b53fd15fe7b9371c1598':
 			file_name = get_submissions(section, assignment)
 			if file_name is None:
-				return "Error, sorry"
+				return abort(404)
 			return send_file(file_name, as_attachment=True)
 		else:
-			return "wrong password"
+			return abort(403)
 
 @app.route('/emails/')
 def email():
 	users = sorted(os.listdir('emails'))
 	emails = [open('emails/' + user).readline().strip() for user in users]
-	return render_template('emails.html', users=zip(users, emails))
+	return render_template('emails.html', title='Email List', users=zip(users, emails))
 
 @app.route('/emails/edit/<name>', methods=['GET', 'POST'])
 def edit(name):
@@ -197,12 +199,14 @@ def confirm(name, code):
 		if lines[3] == code:
 			subprocess.call("echo \"" + lines[2] + "\n" + lines[1] + "\" > emails/" + name, shell=True)
 			return redirect("/emails")
-	except: pass
-	return "no"
+	except:
+		pass
+	return abort(403)
 
 @app.route('/emails/to/<to>', methods=['GET', 'POST'])
 def email_to(to):
 	if request.method == 'GET':
+		# FIXME #5
 		return "<form method=\"POST\" action=\"/emails/to/"+to+"\"><label for=\"from\">from</label><input type=\"text\" name=\"from\" /><br /><label for=\"subject\">subject</label><input type=\"text\" name=\"subject\" size=50 /><br /><label for=\"body\" style=\"float:left\">body</label><textarea name=\"body\" style=\"width: 80%\" rows=20></textarea><br /><input type=\"submit\" /></form>"
 	else:
 		msg = MIMEText(request.form['body'])
@@ -227,7 +231,7 @@ def email_to(to):
 @app.route('/grades/', methods=['GET', 'POST'])
 def grades_login():
 	if request.method == 'GET':
-		return render_template('login.html')
+		return render_template('login.html', title='Log In')
 	else:
 		username = request.form['username']
 		password = request.form['password']
@@ -263,7 +267,7 @@ def grades_show(user):
 		html += "<td>" + formatted[0] + "</td><td>" + formatted[1] + "</td>"
 		html += "</tr>"
 	html += "</table>"
-	return html
+	return html # FIXME #5
 
 @app.route('/grades/logout')
 def grades_logout():
