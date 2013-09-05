@@ -1,19 +1,15 @@
 # Flask imports
 from flask import Flask
 from flask import abort, redirect, session
-from flask import make_response
 from flask import render_template
 from flask import request
 from flask import send_file
-from flask import send_from_directory
 from werkzeug import secure_filename
 
 # Python imports
-from datetime import datetime, date
-import glob
+from datetime import datetime
 import os
 import random
-import re
 import sha
 import shutil
 import smtplib
@@ -167,7 +163,7 @@ def download(section, assignment):
 			return abort(403)
 
 @app.route('/emails/')
-def email():
+def emails():
 	users = sorted(os.listdir('emails'))
 	emails = [open('emails/' + user).readline().strip() for user in users]
 	return render_template('emails.html', title='Email List', users=zip(users, emails))
