@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>{% block title %}{{ title }} - Pyboard{% endblock %}</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" type="text/css" href="/static/main.css">
+		<script type="text/javascript">
+			function validate(){
+				var re = /[a-z]+[0-9]+/
+				if(!re.test(document.submission.id.value))
+				{
+					alert("invalid user id (probably)");
+					return false;
+				}
+				else
+				if(document.submission.id.value == "" ||
+				document.submission.file.value == "")
+				{
+					alert("FILL OUT all the FIELDS!");
+					return false;
+				}
+			}
+		</script>
+	</head>
+
+	<body>
+		<div id="container">
+			<nav>
+				<ul>
+					<li><a href="/">submit assignment</a></li>
+					<li><a href="/emails">email list</a></li>
+					<li><a href="/grades">view grades</a></li>
+				</ul>
+			</nav>
+
+			<div id="content">
+				{% block content %}
+					{{ content|safe }}
+				{% endblock %}
+			</div>
+		</div>
+	</body>
+</html>

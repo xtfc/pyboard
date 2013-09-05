@@ -1,0 +1,42 @@
+html, body {
+	font-family: Helvetica, Calibri, Arial;
+	font-size: 11pt;
+	margin: 0;
+	padding: 0;
+	background-color: hsl(45, 100%, 90%);
+}
+
+#container {
+	box-sizing: border-box;
+	margin: 5em auto 0 auto;
+	padding: 0.6em;
+	width: 35em;
+	border: 1px solid hsl(120, 100%, 5%);
+}
+
+nav {
+	margin: 0;
+	padding: 0;
+}
+nav > ul {
+	margin: 0 auto 0.3em auto;
+	padding: 0;
+	display: table;
+	list-style: none;
+	border-collapse: collapse;
+}
+nav > ul > li {
+	display: table-cell;
+	border: 1px solid hsl(120, 100%, 5%);
+	padding: 0.3em;
+	text-transform: uppercase;
+	font-weight: bold;
+	font-size: 10pt;
+}
+nav > ul > li > a {
+	text-decoration: none;
+	color: hsl(240, 100%, 60%);
+}
+nav > ul > li > a:hover {
+	color: hsl(240, 100%, 30%);
+}
