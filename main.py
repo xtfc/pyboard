@@ -183,15 +183,9 @@ def edit(name):
 		# send an email confirmation
 		verification_code = sha.new(str(random.randint(0, 1000000))).hexdigest()
 		subprocess.call("echo " + verification_code + " >> emails/"+name, shell=True)
-		msg = MIMEText(name +", your request to change your email address to " + requested_email + " was received.\n\nFollow this link to confirm this action http://leiyu5.cs.binghamton.edu/emails/edit/"+name+"/" + verification_code)
-		me = 'emailchange@leiyu5.cs.binghamton.edu'
-		you = old_email
-		msg['Subject'] = 'Email Change Verification'
-		msg['From'] = me
-		msg['To'] = you
-		s = smtplib.SMTP('localhost')
-		s.sendmail(me, [you], msg.as_string())
-		s.quit()
+
+		# FIXME template and actually linkify the text
+		send_email(you = old_email, subject = 'Email Change Verification', body = name + ", your request to change your email address to " + requested_email + " was received.\n\nFollow this link to confirm this action http://leiyu5.cs.binghamton.edu/emails/edit/"+name+"/" + verification_code)
 
 		return redirect("/emails")
 
@@ -270,6 +264,21 @@ def grades_show(user):
 def grades_logout():
 	session.pop('username', None)
 	return redirect("/grades")
+
+def send_email(me = None, you = None, subject = 'Notification', body = None):
+	if not me:
+		me = serverconfig.email_from
+	if not you or not body:
+		return
+
+	message = MIMEText(body)
+	message['Subject'] = subject
+	message['From'] = me
+	message['To'] = you
+
+	s = smtplib.SMTP('localhost')
+	s.sendmail(me, [you], message.as_string())
+	s.quit()
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', debug=True)

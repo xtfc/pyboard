@@ -1,3 +1,4 @@
+email_from = 'pyboard@yourdomain.com'
 app_secret_key = '-'
 ldap_server = "ldap://127.0.0.1:389"
 def make_dn(username):
