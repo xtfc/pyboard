@@ -165,13 +165,9 @@ def download(section, assignment):
 
 @app.route('/emails/')
 def email():
-	output = subprocess.check_output("ls emails", shell=True).rstrip()
-	userids = re.split('\n', output)
-	html = ""
-	for id in userids:
-		email = subprocess.check_output("head -n 1 emails/" + id, shell=True).rstrip()
-		html += id + " <a href=\"/emails/edit/" + id + "\">" + email + "</a><br />"
-	return html
+	users = sorted(os.listdir('emails'))
+	emails = [open('emails/' + user).readline().strip() for user in users]
+	return render_template('emails.html', users=zip(users, emails))
 
 @app.route('/emails/edit/<name>', methods=['GET', 'POST'])
 def edit(name):
