@@ -1,27 +1,31 @@
+# Flask imports
 from flask import Flask, redirect, session
-from flask import request
-from flask import render_template
 from flask import make_response
+from flask import render_template
+from flask import request
 from flask import send_file
 from flask import send_from_directory
-from datetime import datetime, date
 from werkzeug import secure_filename
-import sha
-import os
-import tarfile
-import zipfile
-import subprocess
+
+# Python imports
+from datetime import datetime, date
 import glob
+import os
+import random
+import re
+import sha
 import shutil
 import smtplib
-import re
-import random
+import subprocess
+import tarfile
+import zipfile
 try:
 	import ldap
 except:
 	print "ldap not loaded"
 from email.mime.text import MIMEText
 
+# Pyboard imports
 import serverconfig
 
 app = Flask(__name__)
@@ -32,14 +36,14 @@ def handle_file(file_path):
 
 	dir = os.path.dirname(file_path)
 	ufile = os.path.basename(file_path)
-	
+
 	ext = ufile.split(".")[1:]
 	ext = ".".join(ext)
-	
+
 	pdir = os.path.abspath(os.curdir)
-	
+
 	os.chdir(dir)
-	
+
 	if ext == "tar" or ext == "tar.gz":
 		return_string += "tar or tar.gz file extension found\n"
 		try:
@@ -64,12 +68,12 @@ def handle_file(file_path):
 		return_string += "Can't work with " + ufile + ". Don't know how.\n"
 		os.chdir(pdir)
 		return return_string
-		
+
 	return_string += "file successfully extracted\n"
-	
+
 	find = subprocess.Popen('find .', shell=True, stdout=subprocess.PIPE)
 	return_string += "-\n" + find.communicate()[0].strip() + "\n-\n"
-	
+
 	os.mkdir('bin')
 	return_string += "---running javac---\n"
 	java = subprocess.Popen('javac -d bin -cp .:/usr/share/java/junit.jar **/*.java', shell=True, executable="/bin/zsh", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -83,11 +87,11 @@ def handle_file(file_path):
 	if jout[1]:
 		return_string += jout[1] + "\n"
 
-	
+
 	os.chdir(pdir)
-	
+
 	return return_string
-	
+
 @app.route('/', methods=['GET', 'POST'])
 def upload():
 	if request.method == 'POST':
@@ -142,7 +146,7 @@ def get_submissions(section, assignment):
 	tar.close()
 
 	os.chdir(pdir)
-	
+
 	shutil.move(dir + '../' + file_name, "static/" + file_name)
 	return "static/" + file_name
 
