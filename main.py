@@ -206,20 +206,21 @@ def confirm(name, code):
 @app.route('/emails/to/<to>', methods=['GET', 'POST'])
 def email_to(to):
 	if request.method == 'GET':
-		# FIXME #5
-		return "<form method=\"POST\" action=\"/emails/to/"+to+"\"><label for=\"from\">from</label><input type=\"text\" name=\"from\" /><br /><label for=\"subject\">subject</label><input type=\"text\" name=\"subject\" size=50 /><br /><label for=\"body\" style=\"float:left\">body</label><textarea name=\"body\" style=\"width: 80%\" rows=20></textarea><br /><input type=\"submit\" /></form>"
+		return render_template('compose.html')
 	else:
 		msg = MIMEText(request.form['body'])
 		me = request.form['from']
 		yous = []
-		output = subprocess.check_output("ls emails", shell=True).rstrip()
-		userids = re.split('\n', output)
-		for id in userids:
-			lines = re.split('\n', subprocess.check_output("head -n 2 emails/" + id, shell=True).rstrip())
-			email = lines[0]
-			section = lines[1]
+
+		users = sorted(os.listdir('emails'))
+		for user in users:
+			temp = open('emails/' + user)
+			email = temp.readline().strip()
+			section = temp.readline().strip()
+
 			if to == 'a0' or to == section:
 				yous.append(email)
+
 		msg['Subject'] = request.form['subject']
 		msg['From'] = me
 		msg['To'] = ", ".join(yous)
