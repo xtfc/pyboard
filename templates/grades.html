@@ -1,0 +1,18 @@
+{% extends "main.html" %}
+{% block title %}
+	Grades {{ super() }}
+{% endblock %}
+{% block content %}
+	<table>
+		<tr>
+			<th>Assignment</th>
+			<th>Grade</th>
+		</tr>
+		{% for grade in grades %}
+			<tr>
+				<td>{{ grade[0] }}</td>
+				<td>{{ grade[1] }}</td>
+			</tr>
+		{% endfor %}
+	</table>
+{% endblock %}
