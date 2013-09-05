@@ -178,12 +178,15 @@ def edit(name):
 		return "<form method=\"POST\" action=\"/emails/edit/"+name+"\"><label for=\"email\">new email:</label><input type=\"text\" name=\"email\" /><input type=\"submit\" /></form>- a confirmation email will be sent to your old email address after submission"
 	if request.method == 'POST':
 		requested_email = request.form['email']
-		old_email = subprocess.check_output("head -n 2 emails/" + name, shell=True).rstrip()
-		subprocess.call("echo \"" + old_email + "\n" + requested_email + "\" > emails/" + name, shell=True)
-
-		# send an email confirmation
 		verification_code = sha.new(str(random.randint(0, 1000000))).hexdigest()
-		subprocess.call("echo " + verification_code + " >> emails/"+name, shell=True)
+
+		lines = [line.strip() for line in open('emails/' + name) if line.strip()][:2]
+		lines.append(requested_email)
+		lines.append(verification_code)
+
+		temp = open('emails/' + name, 'w')
+		temp.write('\n'.join(lines))
+		temp.close()
 
 		# FIXME template and actually linkify the text
 		send_email(you = old_email,
@@ -194,10 +197,13 @@ def edit(name):
 
 @app.route('/emails/edit/<name>/<code>')
 def confirm(name, code):
-	lines = re.split('\n', subprocess.check_output("cat emails/" + name, shell=True).rstrip())
+	lines = [line.strip() for line in open('emails/' + name) if line.strip()]
 	try:
 		if lines[3] == code:
-			subprocess.call("echo \"" + lines[2] + "\n" + lines[1] + "\" > emails/" + name, shell=True)
+			temp = open('emails/' + name, 'w')
+			temp.write('{}\n{}\n'.format(lines[2], lines[1]))
+			temp.close()
+
 			return redirect("/emails")
 	except:
 		pass
