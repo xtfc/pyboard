@@ -156,9 +156,9 @@ def get_submissions(section, assignment):
 @app.route('/download/<section>/<assignment>', methods=['GET', 'POST'])
 def download(section, assignment):
 	if request.method == 'GET':
-		return "<form method=\"POST\" action=/download/"+section+"/"+assignment+"><input type=\"password\" name=\"pw\" /></form>"
+		return "<form method=\"POST\" action=/download/"+section+"/"+assignment+"><input type=\"password\" name=\"password\" /></form>"
 	else:
-		if sha.new(request.form['pw']).hexdigest() == '3c580cd7d19aeb7f8b70b53fd15fe7b9371c1598':
+		if sha.new(request.form['password']).hexdigest() == '3c580cd7d19aeb7f8b70b53fd15fe7b9371c1598':
 			file_name = get_submissions(section, assignment)
 			if file_name is None:
 				return "Error, sorry"
@@ -227,14 +227,14 @@ def email_to(to):
 @app.route('/grades/', methods=['GET', 'POST'])
 def grades_login():
 	if request.method == 'GET':
-		return "<form method=\"POST\" action=\"/grades/\"><label for=\"username\">pods id</label><input type=\"text\" name=\"username\" /><br /><label for=\"pw\">password</label><input type=\"password\" name=\"pw\" /><br /><input type=\"submit\" /></form>"
+		return render_template('login.html')
 	else:
 		username = request.form['username']
-		pw = request.form['pw']
+		password = request.form['password']
 		server = serverconfig.ldap_server
 		con = ldap.initialize(server)
 		dn = serverconfig.make_dn(username)
-		rv = con.simple_bind(dn, pw)
+		rv = con.simple_bind(dn, password)
 		try:
 			r = con.result(rv)
 			if r[0] == 97:

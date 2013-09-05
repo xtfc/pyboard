@@ -1,0 +1,8 @@
+{% extends "main.html" %}
+{% block content %}
+	<form method="POST" action="/grades/">
+		<label for="username">PODS ID:</label> <input type="text" name="username"><br>
+		<label for="password">Password:</label><input type="password" name="password"><br>
+		<input type="submit">
+	</form>
+{% endblock %}
