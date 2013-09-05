@@ -128,7 +128,10 @@ def upload():
 			output=output)
 	else:
 		assignments = sorted([line.strip() for line in open('assignments') if line.strip()])
-		return render_template('index.html', title='Submit', assignments=assignments)
+		sections = sorted([line.strip().split('\t') for line in open('sections') if line.strip()])
+		return render_template('index.html', title='Submit',
+			sections = sections,
+			assignments = assignments)
 
 def get_submissions(section, assignment):
 	pdir = os.path.abspath(os.curdir)

@@ -3,13 +3,23 @@
 	<form enctype="multipart/form-data" action="/" method="POST" onsubmit="return validate();" name="submission">
 		<input type="hidden" name="MAX_FILE_SIZE" value="5000000">
 		Your Binghamton user ID (e.g. pdexter1): <input name="id" type="text"><br>
-		Your section: <select name="section"><option value="a0" selected="selected">a0 (Lander)</option><option value="b1">b1 (Williams)</option></select><br>
-		Submitting for: <select name="ass">
+
+		Your section:
+		<select name="section">
+			{% for section in sections %}
+				<option value="{{ section[0] }}">{{ section[0] }} ({{ section[1] }})</option>
+			{% endfor %}
+		</select><br>
+
+		Submitting for:
+		<select name="ass">
 			{% for item in assignments %}
 				<option value="{{ item }}">{{ item }}</option>
 			{% endfor %}
 		</select><br>
+
 		Choose a file to upload: <input name="file" type="file"><br>
+
 		<input type="submit" value="Submit">
 	</form>
 {% endblock %}
