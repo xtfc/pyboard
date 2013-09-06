@@ -4,6 +4,8 @@ venv/
 files/
 emails/
 grades/
+static/
+!static/main.css
 serverconfig.py
 assignments
 sections
