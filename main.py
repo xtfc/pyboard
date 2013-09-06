@@ -290,7 +290,7 @@ def send_email(me = None, you = None, subject = 'Notification', body = None):
 	if not you or not body:
 		return
 
-	if type(you) is str:
+	if type(you) is str or type(you) is unicode:
 		you = [you]
 
 	message = MIMEText(body)
