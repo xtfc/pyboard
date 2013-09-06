@@ -210,7 +210,7 @@ def confirm(name, code):
 @app.route('/emails/to/<to>', methods=['GET', 'POST'])
 def email_to(to):
 	if request.method == 'GET':
-		return render_template('compose.html')
+		return render_template('compose.html', to=to)
 	else:
 		yous = []
 
