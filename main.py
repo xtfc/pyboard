@@ -178,6 +178,7 @@ def edit(name):
 		verification_code = sha.new(str(random.randint(0, 1000000))).hexdigest()
 
 		lines = [line.strip() for line in open('emails/' + name) if line.strip()][:2]
+		old_email = lines[0]
 		lines.append(requested_email)
 		lines.append(verification_code)
 
