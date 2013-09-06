@@ -123,7 +123,8 @@ def upload():
 			assignment=assignment,
 			output=output)
 	else:
-		assignments = sorted([line.strip() for line in open('assignments') if line.strip()])
+		assignments = [line.strip() for line in open('assignments') if line.strip()]
+		assignments.reverse()
 		sections = sorted([line.strip().split('\t') for line in open('sections') if line.strip()])
 		return render_template('index.html', title='Submit',
 			sections = sections,
