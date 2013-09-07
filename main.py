@@ -57,6 +57,16 @@ def requires_login(func):
 		return func(*args, **kwargs)
 	return wrapper
 
+def requires_admin(func):
+	@wraps(func)
+	def wrapper(*args, **kwargs):
+		if session['username'] not in get_admins():
+			flash('You must be an administrator to view this page.')
+			return redirect(url_for('index'))
+
+		return func(*args, **kwargs)
+	return wrapper
+
 def validate_login(username, password):
 	server = serverconfig.ldap_server
 	con = ldap.initialize(server)
@@ -155,6 +165,9 @@ def get_submissions(section, assignment):
 def get_user_info(username):
 	return [line.strip() for line in open('emails/' + username) if line.strip()]
 
+def get_admins():
+	return [line.strip() for line in open('admins') if line.strip()]
+
 @app.route('/', methods=['GET', 'POST'])
 @requires_login
 def index():
@@ -198,18 +211,19 @@ def index():
 			assignments = assignments)
 
 @app.route('/download/<section>/<assignment>', methods=['GET', 'POST'])
+@requires_login
+@requires_admin
 def download(section, assignment):
-	if request.method == 'GET':
-		# FIXME #5, #7
-		return "<form method=\"POST\" action=/download/"+section+"/"+assignment+"><input type=\"password\" name=\"password\" /></form>"
-	else:
-		if sha.new(request.form['password']).hexdigest() == '3c580cd7d19aeb7f8b70b53fd15fe7b9371c1598':
-			file_name = get_submissions(section, assignment)
-			if file_name is None:
-				return abort(404)
-			return send_file(file_name, as_attachment=True)
-		else:
-			return abort(403)
+	file_name = get_submissions(section, assignment)
+	if file_name is None:
+		return abort(404)
+	return send_file(file_name, as_attachment=True)
+
+@app.route('/admin')
+@requires_login
+@requires_admin
+def admin():
+	return render_template('main.html', content = 'You are an administrator.')
 
 @app.route('/emails')
 @requires_login
