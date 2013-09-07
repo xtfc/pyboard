@@ -38,10 +38,13 @@
 			<nav>
 				{% block nav %}
 					<ul>
-						<li><a href="/">submit assignment</a></li>
-						<li><a href="/emails">email list</a></li>
-						<li><a href="/grades">view grades</a></li>
-						{% if 'username' in session %}<li><a href="/logout">{{ session['username'] }}</a></li>{% endif %}
+						<li><a href="{{ url_for('index') }}">submit</a></li>
+						<li><a href="{{ url_for('emails') }}">emails</a></li>
+						<li><a href="{{ url_for('grades') }}">grades</a></li>
+						{% if 'username' in session %}
+							<li><a href="{{ url_for('profile') }}">{{ session['username'] }}</a></li>
+							<li><a href="{{ url_for('logout') }}">log out</a></li>
+						{% endif %}
 					</ul>
 				{% endblock %}
 			</nav>

@@ -33,11 +33,12 @@ nav > ul > li {
 	font-weight: bold;
 	font-size: 10pt;
 }
-nav > ul > li > a {
+
+a {
 	text-decoration: none;
 	color: hsl(240, 100%, 60%);
 }
-nav > ul > li > a:hover {
+a:hover {
 	color: hsl(240, 100%, 30%);
 }
 
