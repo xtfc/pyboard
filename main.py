@@ -152,6 +152,9 @@ def get_submissions(section, assignment):
 	shutil.move(dir + '../' + file_name, "static/" + file_name)
 	return "static/" + file_name
 
+def get_user_info(username):
+	return [line.strip() for line in open('emails/' + username) if line.strip()]
+
 @app.route('/', methods=['GET', 'POST'])
 @requires_login
 def index():
@@ -212,7 +215,7 @@ def download(section, assignment):
 @requires_login
 def emails():
 	users = sorted(os.listdir('emails'))
-	emails = [open('emails/' + user).readline().strip() for user in users]
+	emails = [get_user_info(user)[0] for user in users]
 	return render_template('emails.html', title='Email List', users=zip(users, emails))
 
 @app.route('/emails/edit/<name>', methods=['GET', 'POST'])
@@ -223,7 +226,7 @@ def edit(name):
 		requested_email = request.form['email']
 		verification_code = sha.new(str(random.randint(0, 1000000))).hexdigest()
 
-		lines = [line.strip() for line in open('emails/' + name) if line.strip()][:2]
+		lines = get_user_info(name)[:2]
 		old_email = lines[0]
 		lines.append(requested_email)
 		lines.append(verification_code)
@@ -241,7 +244,7 @@ def edit(name):
 
 @app.route('/emails/edit/<name>/<code>')
 def confirm(name, code):
-	lines = [line.strip() for line in open('emails/' + name) if line.strip()]
+	lines = get_user_info(name)
 	try:
 		if lines[3] == code:
 			temp = open('emails/' + name, 'w')
@@ -262,9 +265,9 @@ def email_to(to):
 
 		users = sorted(os.listdir('emails'))
 		for user in users:
-			temp = open('emails/' + user)
-			email = temp.readline().strip()
-			section = temp.readline().strip()
+			info = get_user_info(user)
+			email = info[0]
+			section = info[1]
 
 			if to == 'a0' or to == section:
 				yous.append(email)
