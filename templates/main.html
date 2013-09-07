@@ -25,16 +25,6 @@
 
 	<body>
 		<div id="container">
-			{% with messages = get_flashed_messages() %}
-				{% if messages %}
-					<ul class="flashes">
-						{% for message in messages %}
-							<li>{{ message }}</li>
-						{% endfor %}
-					</ul>
-				{% endif %}
-			{% endwith %}
-
 			<nav>
 				{% block nav %}
 					<ul>
@@ -48,6 +38,16 @@
 					</ul>
 				{% endblock %}
 			</nav>
+
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					<ul id="flashes">
+						{% for message in messages %}
+							<li>{{ message }}</li>
+						{% endfor %}
+					</ul>
+				{% endif %}
+			{% endwith %}
 
 			<div id="content">
 				{% block content %}

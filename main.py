@@ -308,6 +308,7 @@ def login():
 	else:
 		if validate_login(request.form['username'], request.form['password']):
 			session['username'] = request.form['username']
+			flash('Logged in')
 			return redirect(url_for('index'))
 
 		flash('Invalid login')
@@ -316,6 +317,7 @@ def login():
 @app.route('/logout')
 def logout():
 	session.pop('username', None)
+	flash('Logged out')
 	return redirect(url_for('login'))
 
 @app.errorhandler(400)

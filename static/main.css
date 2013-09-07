@@ -18,20 +18,33 @@ nav {
 	margin: 0;
 	padding: 0;
 }
-nav > ul {
+nav > ul, #flashes {
 	margin: 0 auto 0.3em auto;
 	padding: 0;
-	display: table;
+	width: 100%;
 	list-style: none;
+}
+nav > ul {
+	display: table;
 	border-collapse: collapse;
+}
+#flashes {
+	display: block;
+}
+nav > ul > li, #flashes > li {
+	text-align: center;
+	border: 1px solid hsl(120, 100%, 5%);
+	padding: 0.3em;
+	background-color: hsl(45, 100%, 85%);
 }
 nav > ul > li {
 	display: table-cell;
-	border: 1px solid hsl(120, 100%, 5%);
-	padding: 0.3em;
 	text-transform: uppercase;
 	font-weight: bold;
 	font-size: 10pt;
+}
+#flashes > li {
+	display: block;
 }
 
 a {
