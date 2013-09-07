@@ -2,16 +2,8 @@
 {% block content %}
 	<form enctype="multipart/form-data" action="/" method="POST" onsubmit="return validate();" name="submission">
 		<input type="hidden" name="MAX_FILE_SIZE" value="5000000">
-		Your Binghamton user ID (e.g. pdexter1): <input name="id" type="text"><br>
 
-		Your section:
-		<select name="section">
-			{% for section in sections %}
-				<option value="{{ section[0] }}">{{ section[0] }} ({{ section[1] }})</option>
-			{% endfor %}
-		</select><br>
-
-		Submitting for:
+		Assignment:
 		<select name="ass">
 			{% for item in assignments %}
 				<option value="{{ item }}">{{ item }}</option>

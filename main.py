@@ -159,14 +159,16 @@ def get_user_info(username):
 @requires_login
 def index():
 	if request.method == 'POST':
-		name = request.form['id']
+		name = session['username']
+		info = get_user_info(name)
+		section = info[1]
+
 		ufile = request.files['file']
-		section = request.form['section']
 		filename = secure_filename(ufile.filename)
 		assignment = request.form['ass']
 		d = datetime.now()
 		time_stamp = d.strftime("%Y-%m-%d-%H-%M-%S")
-		upload_dir = "files/" + "/" + section + "/" + assignment + "/" + name + "/" + time_stamp + "/"
+		upload_dir = "files/" + section + "/" + assignment + "/" + name + "/" + time_stamp + "/"
 
 		try:
 			os.makedirs(upload_dir)
@@ -192,9 +194,7 @@ def index():
 	else:
 		assignments = [line.strip() for line in open('assignments') if line.strip()]
 		assignments.reverse()
-		sections = sorted([line.strip().split('\t') for line in open('sections') if line.strip()])
 		return render_template('index.html', title='Submit',
-			sections = sections,
 			assignments = assignments)
 
 @app.route('/download/<section>/<assignment>', methods=['GET', 'POST'])
