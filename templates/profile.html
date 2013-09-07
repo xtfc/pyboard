@@ -5,9 +5,12 @@
 {% block content %}
 	<ul>
 		<li>Username: {{ username }}</li>
-		<li>Email: <a href="mailto:{{ info[0] }}">{{ info[0] }}</a></li>
+		<li>
+			Email: <a href="mailto:{{ info[0] }}">{{ info[0] }}</a>
+			{% if isuser %}<a href="{{ url_for('profile_edit') }}">(edit)</a>{% endif %}
+		</li>
 		<li>Section {{ info[1] }}</li>
 		{% if admin %}<li style="font-weight: bold">Administrator</li>{% endif %}
-		{% if 'username' in session and username == session['username']  %}<li style="font-weight: bold">You</li>{% endif %}
+		{% if isuser %}<li style="font-weight: bold">You</li>{% endif %}
 	</ul>
 {% endblock %}

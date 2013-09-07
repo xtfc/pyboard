@@ -225,23 +225,45 @@ def download(section, assignment):
 def admin():
 	return render_template('main.html', content = 'You are an administrator.')
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 @app.route('/user/<username>')
 @requires_login
 def profile(username = None):
 	if not username:
 		username = session['username']
-
 	try:
 		info = get_user_info(username)
 	except:
 		return abort(404)
 
+	if request.method == 'POST':
+		info[0] = request.form['new_email']
+
+		temp = open('emails/' + username, 'w')
+		temp.write('\n'.join(info))
+		temp.close()
+
+		flash('Email updated to "' + info[0] + '"')
+
 	admin = username in get_admins()
 	return render_template('profile.html',
 		username = username,
 		info = info,
-		admin = admin)
+		admin = admin,
+		isuser = 'username' in session and session['username'] == username)
+
+@app.route('/profile/edit')
+@requires_login
+def profile_edit():
+	username = session['username']
+	try:
+		info = get_user_info(username)
+	except:
+		return abort(404)
+
+	return render_template('profile_edit.html',
+		username = username,
+		info = info)
 
 @app.route('/emails')
 @requires_login
@@ -249,44 +271,6 @@ def emails():
 	users = sorted(os.listdir('emails'))
 	emails = [get_user_info(user)[0] for user in users]
 	return render_template('emails.html', title='Email List', users=zip(users, emails))
-
-@app.route('/emails/edit/<name>', methods=['GET', 'POST'])
-def edit(name):
-	if request.method == 'GET':
-		return "<form method=\"POST\" action=\"/emails/edit/"+name+"\"><label for=\"email\">new email:</label><input type=\"text\" name=\"email\" /><input type=\"submit\" /></form>- a confirmation email will be sent to your old email address after submission"
-	if request.method == 'POST':
-		requested_email = request.form['email']
-		verification_code = sha.new(str(random.randint(0, 1000000))).hexdigest()
-
-		lines = get_user_info(name)[:2]
-		old_email = lines[0]
-		lines.append(requested_email)
-		lines.append(verification_code)
-
-		temp = open('emails/' + name, 'w')
-		temp.write('\n'.join(lines))
-		temp.close()
-
-		# FIXME template and actually linkify the text
-		send_email(you = old_email,
-			subject = 'Email Change Verification',
-			body = name + ", your request to change your email address to " + requested_email + " was received.\n\nFollow this link to confirm this action http://leiyu5.cs.binghamton.edu/emails/edit/"+name+"/" + verification_code)
-
-		return redirect("/emails")
-
-@app.route('/emails/edit/<name>/<code>')
-def confirm(name, code):
-	lines = get_user_info(name)
-	try:
-		if lines[3] == code:
-			temp = open('emails/' + name, 'w')
-			temp.write('{}\n{}\n'.format(lines[2], lines[1]))
-			temp.close()
-
-			return redirect("/emails")
-	except:
-		pass
-	return abort(403)
 
 @app.route('/emails/to/<to>', methods=['GET', 'POST'])
 def email_to(to):
