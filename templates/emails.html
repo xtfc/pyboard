@@ -2,7 +2,7 @@
 {% block content %}
 	<ul>
 		{% for user in users %}
-			<li>{{ user[0] }} &#8210; <a href="/emails/edit/{{ user[0] }}">{{ user[1] }}</a></li>
+			<li><a href="{{ url_for('profile', username = user[0]) }}">{{ user[0] }}</a> &#8210; <a href="mailto:{{ user[1] }}">{{ user[1] }}</a></li>
 		{% endfor %}
 	</ul>
 {% endblock %}

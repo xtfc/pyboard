@@ -225,6 +225,24 @@ def download(section, assignment):
 def admin():
 	return render_template('main.html', content = 'You are an administrator.')
 
+@app.route('/profile')
+@app.route('/user/<username>')
+@requires_login
+def profile(username = None):
+	if not username:
+		username = session['username']
+
+	try:
+		info = get_user_info(username)
+	except:
+		return abort(404)
+
+	admin = username in get_admins()
+	return render_template('profile.html',
+		username = username,
+		info = info,
+		admin = admin)
+
 @app.route('/emails')
 @requires_login
 def emails():
