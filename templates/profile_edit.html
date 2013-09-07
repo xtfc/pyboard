@@ -1,0 +1,10 @@
+{% extends "main.html" %}
+{% block title %}
+	Edit {{ username }} {{ super() }}
+{% endblock %}
+{% block content %}
+	<form method="POST" action="{{ url_for('profile') }}">
+		<label for="new_email">New email:</label><input type="text" name="new_email">
+		<input type="submit">
+	</form>
+{% endblock %}
