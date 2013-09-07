@@ -11,7 +11,7 @@ html, body {
 	margin: 5em auto 0 auto;
 	padding: 0.6em;
 	width: 35em;
-	border: 1px solid hsl(120, 100%, 5%);
+	border: 1px solid #111;
 }
 
 nav {
@@ -33,7 +33,7 @@ nav > ul {
 }
 nav > ul > li, #flashes > li {
 	text-align: center;
-	border: 1px solid hsl(120, 100%, 5%);
+	border: 1px solid #111;
 	padding: 0.3em;
 	background-color: hsl(45, 100%, 85%);
 }
@@ -46,6 +46,18 @@ nav > ul > li {
 #flashes > li {
 	display: block;
 }
+
+#grades {
+	border-collapse: collapse;
+	width: 100%;
+}
+#grades, #grades th {
+	border: 1px solid ;
+}
+#grades td {
+	border: 1px dotted #333;
+}
+
 
 a {
 	text-decoration: none;
