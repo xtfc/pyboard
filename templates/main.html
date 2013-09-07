@@ -25,12 +25,25 @@
 
 	<body>
 		<div id="container">
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					<ul class="flashes">
+						{% for message in messages %}
+							<li>{{ message }}</li>
+						{% endfor %}
+					</ul>
+				{% endif %}
+			{% endwith %}
+
 			<nav>
-				<ul>
-					<li><a href="/">submit assignment</a></li>
-					<li><a href="/emails">email list</a></li>
-					<li><a href="/grades">view grades</a></li>
-				</ul>
+				{% block nav %}
+					<ul>
+						<li><a href="/">submit assignment</a></li>
+						<li><a href="/emails">email list</a></li>
+						<li><a href="/grades">view grades</a></li>
+						{% if 'username' in session %}<li><a href="/logout">{{ session['username'] }}</a></li>{% endif %}
+					</ul>
+				{% endblock %}
 			</nav>
 
 			<div id="content">

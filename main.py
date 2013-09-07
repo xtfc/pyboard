@@ -1,13 +1,14 @@
 # Flask imports
 from flask import Flask
-from flask import abort, redirect, session
-from flask import render_template
+from flask import abort, redirect, session, flash
+from flask import render_template, url_for
 from flask import request
 from flask import send_file
 from werkzeug import secure_filename
 
 # Python imports
 from datetime import datetime
+from functools import wraps
 import os
 import random
 import sha
@@ -27,6 +28,49 @@ import serverconfig
 
 app = Flask(__name__)
 app.secret_key = serverconfig.app_secret_key
+
+def send_email(me = None, you = None, subject = 'Notification', body = None):
+	if not me:
+		me = serverconfig.email_from
+	if not you or not body:
+		return
+
+	if type(you) is str or type(you) is unicode:
+		you = [you]
+
+	message = MIMEText(body)
+	message['Subject'] = subject
+	message['From'] = me
+	message['To'] = ', '.join(you)
+
+	s = smtplib.SMTP('localhost')
+	s.sendmail(me, you, message.as_string())
+	s.quit()
+
+def requires_login(func):
+	@wraps(func)
+	def wrapper(*args, **kwargs):
+		if 'username' not in session:
+			flash('You must be logged in to view this page.')
+			return render_template('login.html')
+
+		return func(*args, **kwargs)
+	return wrapper
+
+def validate_login(username, password):
+	server = serverconfig.ldap_server
+	con = ldap.initialize(server)
+	dn = serverconfig.make_dn(username)
+	rv = con.simple_bind(dn, password)
+
+	try:
+		r = con.result(rv)
+		if r[0] == 97:
+			return True
+	except:
+		pass
+
+	return False
 
 def handle_file(file_path):
 	return_string = ""
@@ -89,8 +133,28 @@ def handle_file(file_path):
 
 	return return_string
 
+def get_submissions(section, assignment):
+	pdir = os.path.abspath(os.curdir)
+	dir = "files/" + "/" + section + "/" + assignment + "/"
+	try:
+		os.chdir(dir)
+	except:
+		os.chdir(pdir)
+		return None
+	os.chdir('..')
+	file_name = section + "_" + assignment + ".tar.gz"
+	tar = tarfile.open(file_name, "w:gz")
+	tar.add(assignment)
+	tar.close()
+
+	os.chdir(pdir)
+
+	shutil.move(dir + '../' + file_name, "static/" + file_name)
+	return "static/" + file_name
+
 @app.route('/', methods=['GET', 'POST'])
-def upload():
+@requires_login
+def index():
 	if request.method == 'POST':
 		name = request.form['id']
 		ufile = request.files['file']
@@ -130,25 +194,6 @@ def upload():
 			sections = sections,
 			assignments = assignments)
 
-def get_submissions(section, assignment):
-	pdir = os.path.abspath(os.curdir)
-	dir = "files/" + "/" + section + "/" + assignment + "/"
-	try:
-		os.chdir(dir)
-	except:
-		os.chdir(pdir)
-		return None
-	os.chdir('..')
-	file_name = section + "_" + assignment + ".tar.gz"
-	tar = tarfile.open(file_name, "w:gz")
-	tar.add(assignment)
-	tar.close()
-
-	os.chdir(pdir)
-
-	shutil.move(dir + '../' + file_name, "static/" + file_name)
-	return "static/" + file_name
-
 @app.route('/download/<section>/<assignment>', methods=['GET', 'POST'])
 def download(section, assignment):
 	if request.method == 'GET':
@@ -163,7 +208,8 @@ def download(section, assignment):
 		else:
 			return abort(403)
 
-@app.route('/emails/')
+@app.route('/emails')
+@requires_login
 def emails():
 	users = sorted(os.listdir('emails'))
 	emails = [open('emails/' + user).readline().strip() for user in users]
@@ -230,43 +276,28 @@ def email_to(to):
 
 		return "message sent successfully"
 
-@app.route('/grades/', methods=['GET', 'POST'])
-def grades_login():
-	if request.method == 'GET':
-		return render_template('login.html', title='Log In')
-	else:
-		username = request.form['username']
-		password = request.form['password']
-		server = serverconfig.ldap_server
-		con = ldap.initialize(server)
-		dn = serverconfig.make_dn(username)
-		rv = con.simple_bind(dn, password)
-		try:
-			r = con.result(rv)
-			if r[0] == 97:
-				session['username'] = username
-				return redirect("/grades/" + username)
-		except:
-			pass
-
-		return abort(403)
-
-@app.route('/grades/<user>')
-def grades_show(user):
-	if 'username' not in session:
-		return abort(403)
-
-	logged_in_as = session['username']
-	if logged_in_as != user:
-		return abort(403)
-
-	grades = sorted([line.strip().split('\t') for line in open('grades/' + user) if line.strip()])
+@app.route('/grades')
+@requires_login
+def grades():
+	grades = sorted([line.strip().split('\t') for line in open('grades/' + session['username']) if line.strip()])
 	return render_template('grades.html', grades=grades)
 
-@app.route('/grades/logout')
-def grades_logout():
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+	if request.method == 'GET':
+		return render_template('login.html')
+	else:
+		if validate_login(request.form['username'], request.form['password']):
+			session['username'] = request.form['username']
+			return redirect(url_for('index'))
+
+		flash('Invalid login')
+		return redirect(url_for('login'))
+
+@app.route('/logout')
+def logout():
 	session.pop('username', None)
-	return redirect("/grades")
+	return redirect(url_for('login'))
 
 @app.errorhandler(400)
 @app.errorhandler(401)
@@ -283,24 +314,6 @@ def view_error(error):
 		return render_template('error.html',
 			error = 'Oh my',
 			desc = 'Something went wrong.')
-
-def send_email(me = None, you = None, subject = 'Notification', body = None):
-	if not me:
-		me = serverconfig.email_from
-	if not you or not body:
-		return
-
-	if type(you) is str or type(you) is unicode:
-		you = [you]
-
-	message = MIMEText(body)
-	message['Subject'] = subject
-	message['From'] = me
-	message['To'] = ', '.join(you)
-
-	s = smtplib.SMTP('localhost')
-	s.sendmail(me, you, message.as_string())
-	s.quit()
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', debug=True)
