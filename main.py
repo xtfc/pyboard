@@ -191,7 +191,7 @@ def index():
 		full_path = upload_dir + filename
 		ufile.save(full_path)
 
-		verification_code = sha.new(name+'_'+assignment).hexdigest()
+		verification_code = sha.new(serverconfig.verification_salt + name + assignment).hexdigest()
 		# FIXME template
 		send_email(you = name + '@binghamton.edu',
 			subject = 'Submission Received',
