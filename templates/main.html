@@ -6,17 +6,10 @@
 		<link rel="stylesheet" type="text/css" href="/static/main.css">
 		<script type="text/javascript">
 			function validate(){
-				var re = /[a-z]+[0-9]+/
-				if(!re.test(document.submission.id.value))
-				{
-					alert("invalid user id (probably)");
-					return false;
-				}
-				else
 				if(document.submission.id.value == "" ||
 				document.submission.file.value == "")
 				{
-					alert("FILL OUT all the FIELDS!");
+					alert("You must include a submission");
 					return false;
 				}
 			}
