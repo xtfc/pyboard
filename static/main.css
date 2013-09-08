@@ -56,6 +56,10 @@ nav > ul > li {
 }
 #grades td {
 	border: 1px dotted #333;
+	text-align: center;
+}
+#grades td, #grades th {
+	padding: 0.2em;
 }
 
 

@@ -7,12 +7,22 @@
 		<tr>
 			<th>Assignment</th>
 			<th>Grade</th>
+			<th>Possible</th>
+			<th>Percent</th>
 		</tr>
 		{% for grade in grades %}
 			<tr>
 				<td>{{ grade[0] }}</td>
 				<td>{{ grade[1] }}</td>
+				<td>{{ grade[2] }}</td>
+				<td>{{ "%.1f"|format(grade[1] * 100.0 / grade[2]) }}%</td>
 			</tr>
 		{% endfor %}
+		<tr>
+			<th>{{ total[0] }}</th>
+			<th>{{ total[1] }}</th>
+			<th>{{ total[2] }}</th>
+			<th>{{ "%.1f"|format(total[1] * 100.0 / total[2]) }}%</th>
+		</tr>
 	</table>
 {% endblock %}
