@@ -193,7 +193,7 @@ def index():
 
 		verification_code = sha.new(serverconfig.verification_salt + name + assignment).hexdigest()
 		# FIXME template
-		send_email(you = name + '@binghamton.edu',
+		send_email(you = info[0],
 			subject = 'Submission Received',
 			body = "Your submission for assignment `" + assignment + "' was received.\n\nYour confirmation code is " + verification_code)
 
