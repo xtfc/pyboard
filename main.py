@@ -298,8 +298,11 @@ def email_to(to):
 @app.route('/grades')
 @requires_login
 def grades():
+	return grades_for_user(session['username'])
+
+def grades_for_user(username):
 	grades = sorted([line.strip().split('\t') for line
-		in open('grades/' + session['username']) if line.strip()])
+		in open('grades/' + username) if line.strip()])
 	grades = map(lambda x: (x[0], int(x[1]), int(x[2])), grades)
 	total = reduce(lambda x, y: ('Total', x[1] + y[1], x[2] + y[2]), grades)
 	return render_template('grades.html',
