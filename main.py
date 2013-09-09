@@ -223,7 +223,7 @@ def download(section, assignment):
 @requires_login
 @requires_admin
 def admin():
-	return render_template('main.html', content = 'You are an administrator.')
+	return render_template('admin.html')
 
 @app.route('/profile', methods=['GET', 'POST'])
 @app.route('/user/<username>')
