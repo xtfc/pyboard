@@ -74,7 +74,11 @@ def requires_login(func):
 def requires_admin(func):
 	@wraps(func)
 	def wrapper(*args, **kwargs):
-		if 'admin' != g.user.section:
+		if 'username' not in session:
+			flash('You must be logged in to view this page.')
+			return render_template('login.html')
+
+		if g.user.section != 'admin':
 			flash('You must be an administrator to view this page.')
 			return redirect(url_for('index'))
 
@@ -231,7 +235,6 @@ def index():
 			assignments = assignments)
 
 @app.route('/download/<section>/<assignment>', methods=['GET', 'POST'])
-@requires_login
 @requires_admin
 def download(section, assignment):
 	file_name = get_submissions(section, assignment)
@@ -240,7 +243,6 @@ def download(section, assignment):
 	return send_file(file_name, as_attachment=True)
 
 @app.route('/admin')
-@requires_login
 @requires_admin
 def admin():
 	return render_template('admin.html')
@@ -312,7 +314,6 @@ def grades():
 
 @app.route('/admin/grades')
 @app.route('/admin/grades/<username>')
-@requires_login
 @requires_admin
 def grades_admin(username = None):
 	if username is None:
