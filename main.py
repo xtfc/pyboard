@@ -317,6 +317,7 @@ def grades():
 def grades_admin(username = None):
 	if username is None:
 		users = [User(user) for user in sorted(os.listdir('users'))]
+		users = [user for user in users if user.section != 'admin']
 		return render_template('class_grades.html',
 			title = 'Class Grades',
 			users = users)
