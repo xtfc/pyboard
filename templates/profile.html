@@ -10,7 +10,7 @@
 			{% if isuser %}<a href="{{ url_for('profile_edit') }}">(edit)</a>{% endif %}
 		</li>
 		<li>Section {{ info[1] }}</li>
-		{% if admin %}<li style="font-weight: bold">Administrator</li>{% endif %}
+		{% if admin %}<li style="font-weight: bold"><a href="{{ url_for('admin') }}">Administrator</a></li>{% endif %}
 		{% if isuser %}<li style="font-weight: bold">You</li>{% endif %}
 	</ul>
 {% endblock %}
