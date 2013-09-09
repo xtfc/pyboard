@@ -10,7 +10,7 @@
 			{% if g.user.username == user.username %}<a href="{{ url_for('profile_edit') }}">(edit)</a>{% endif %}
 		</li>
 		{% if 'admin' == user.section %}
-			<li style="font-weight: bold"><a href="{{ url_for('admin') }}">Administrator</a></li>
+			<li style="font-weight: bold">Administrator</li>
 		{% else %}
 			<li>Section: {{ user.section }}</li>
 		{% endif %}
