@@ -3,4 +3,7 @@
 	Admin {{ super() }}
 {% endblock %}
 {% block content %}
+	<ul>
+		<li><a href="{{ url_for('grades_admin', username = None) }}">Student Grades</a></li>
+	</ul>
 {% endblock %}

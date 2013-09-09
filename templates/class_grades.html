@@ -1,0 +1,8 @@
+{% extends "main.html" %}
+{% block content %}
+	<ul>
+		{% for user in users %}
+			<li><a href="{{ url_for('grades_admin', username = user[0]) }}">{{ user[0] }}</a></li>
+		{% endfor %}
+	</ul>
+{% endblock %}

@@ -300,6 +300,18 @@ def email_to(to):
 def grades():
 	return grades_for_user(session['username'])
 
+@app.route('/admin/grades')
+@app.route('/admin/grades/<username>')
+@requires_login
+@requires_admin
+def grades_admin(username = None):
+	if username is None:
+		users = sorted(os.listdir('emails'))
+		emails = [get_user_info(user)[0] for user in users]
+		return render_template('class_grades.html', title='Class Grades', users=zip(users,emails))
+	else:
+		return grades_for_user(username)
+
 def grades_for_user(username):
 	grades = sorted([line.strip().split('\t') for line
 		in open('grades/' + username) if line.strip()])
@@ -308,6 +320,7 @@ def grades_for_user(username):
 	return render_template('grades.html',
 		grades=grades,
 		total = total)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
