@@ -1,6 +1,6 @@
 # Flask imports
 from flask import Flask
-from flask import abort, redirect, session, flash
+from flask import abort, redirect, session, flash, g
 from flask import render_template, url_for
 from flask import request
 from flask import send_file
@@ -28,6 +28,20 @@ import serverconfig
 
 app = Flask(__name__)
 app.secret_key = serverconfig.app_secret_key
+
+class User:
+	def __init__(self, username):
+		temp = open('users/' + username)
+		self.username = username.strip()
+		self.email = temp.readline().strip()
+		self.section = temp.readline().strip()
+		temp.close()
+
+	def write(self):
+		temp = open('users/' + self.username, 'w')
+		temp.write(self.email + '\n')
+		temp.write(self.section + '\n')
+		temp.close()
 
 def send_email(me = None, you = None, subject = 'Notification', body = None):
 	if not me:
@@ -60,7 +74,7 @@ def requires_login(func):
 def requires_admin(func):
 	@wraps(func)
 	def wrapper(*args, **kwargs):
-		if session['username'] not in get_admins():
+		if 'admin' != g.user.section:
 			flash('You must be an administrator to view this page.')
 			return redirect(url_for('index'))
 
@@ -162,26 +176,32 @@ def get_submissions(section, assignment):
 	shutil.move(dir + '../' + file_name, "static/" + file_name)
 	return "static/" + file_name
 
-def get_user_info(username):
-	return [line.strip() for line in open('emails/' + username) if line.strip()]
+def grades_for_user(username):
+	grades = sorted([line.strip().split('\t') for line
+		in open('grades/' + username) if line.strip()])
+	grades = map(lambda x: (x[0], int(x[1]), int(x[2])), grades)
+	total = reduce(lambda x, y: ('', x[1] + y[1], x[2] + y[2]), grades)
+	return render_template('grades.html',
+		grades=grades,
+		total = total)
 
-def get_admins():
-	return [line.strip() for line in open('admins') if line.strip()]
+@app.before_request
+def before():
+	if 'username' in session:
+		g.user = User(session['username'])
 
 @app.route('/', methods=['GET', 'POST'])
 @requires_login
 def index():
 	if request.method == 'POST':
-		name = session['username']
-		info = get_user_info(name)
-		section = info[1]
+		user = User(session['username'])
 
 		ufile = request.files['file']
 		filename = secure_filename(ufile.filename)
 		assignment = request.form['ass']
 		d = datetime.now()
 		time_stamp = d.strftime("%Y-%m-%d-%H-%M-%S")
-		upload_dir = "files/" + section + "/" + assignment + "/" + name + "/" + time_stamp + "/"
+		upload_dir = "files/" + user.section + "/" + assignment + "/" + user.username + "/" + time_stamp + "/"
 
 		try:
 			os.makedirs(upload_dir)
@@ -191,19 +211,19 @@ def index():
 		full_path = upload_dir + filename
 		ufile.save(full_path)
 
-		verification_code = sha.new(serverconfig.verification_salt + name + assignment).hexdigest()
+		verification_code = sha.new(serverconfig.verification_salt + user.username + assignment).hexdigest()
 		# FIXME template
-		send_email(you = info[0],
+		send_email(you = user.email,
 			subject = 'Submission Received',
 			body = "Your submission for assignment `" + assignment + "' was received.\n\nYour confirmation code is " + verification_code)
 
 		output = handle_file(full_path)
 		return render_template('upload.html', title='Upload',
-			name=name,
-			filename=filename,
-			section=section,
-			assignment=assignment,
-			output=output)
+			name = user.username,
+			filename = filename,
+			section = user.section,
+			assignment = assignment,
+			output = output)
 	else:
 		assignments = [line.strip() for line in open('assignments') if line.strip()]
 		assignments.reverse()
@@ -232,24 +252,18 @@ def profile(username = None):
 	if not username:
 		username = session['username']
 	try:
-		info = get_user_info(username)
+		user = User(username)
 	except:
 		return abort(404)
 
 	if request.method == 'POST':
-		info[0] = request.form['new_email']
-
-		temp = open('emails/' + username, 'w')
-		temp.write('\n'.join(info))
-		temp.close()
+		user.email = request.form['new_email']
+		user.write()
 
 		flash('Email updated to "' + info[0] + '"')
 
-	admin = username in get_admins()
 	return render_template('profile.html',
-		username = username,
-		info = info,
-		admin = admin,
+		user = user,
 		isuser = 'username' in session and session['username'] == username)
 
 @app.route('/profile/edit')
@@ -257,36 +271,32 @@ def profile(username = None):
 def profile_edit():
 	username = session['username']
 	try:
-		info = get_user_info(username)
+		user = User(username)
 	except:
 		return abort(404)
 
 	return render_template('profile_edit.html',
-		username = username,
-		info = info)
+		user = user)
 
-@app.route('/emails')
+@app.route('/users')
 @requires_login
-def emails():
-	users = sorted(os.listdir('emails'))
-	emails = [get_user_info(user)[0] for user in users]
-	return render_template('emails.html', title='Email List', users=zip(users, emails))
+def users():
+	users = [User(user) for user in sorted(os.listdir('users'))]
+	return render_template('users.html',
+		title='Email List',
+		users=users)
 
-@app.route('/emails/to/<to>', methods=['GET', 'POST'])
+@app.route('/email/<to>', methods=['GET', 'POST'])
 def email_to(to):
 	if request.method == 'GET':
 		return render_template('compose.html', to=to)
 	else:
 		yous = []
 
-		users = sorted(os.listdir('emails'))
+		users = [User(user) for user in sorted(os.listdir('users'))]
 		for user in users:
-			info = get_user_info(user)
-			email = info[0]
-			section = info[1]
-
-			if to == 'a0' or to == section:
-				yous.append(email)
+			if to == 'a0' or to == user.section or user.section == 'admin':
+				yous.append(user.email)
 
 		send_email(me = request.form['from'],
 			you = yous,
@@ -306,21 +316,12 @@ def grades():
 @requires_admin
 def grades_admin(username = None):
 	if username is None:
-		users = sorted(os.listdir('emails'))
-		emails = [get_user_info(user)[0] for user in users]
-		return render_template('class_grades.html', title='Class Grades', users=zip(users,emails))
+		users = [User(user) for user in sorted(os.listdir('users'))]
+		return render_template('class_grades.html',
+			title = 'Class Grades',
+			users = users)
 	else:
 		return grades_for_user(username)
-
-def grades_for_user(username):
-	grades = sorted([line.strip().split('\t') for line
-		in open('grades/' + username) if line.strip()])
-	grades = map(lambda x: (x[0], int(x[1]), int(x[2])), grades)
-	total = reduce(lambda x, y: ('', x[1] + y[1], x[2] + y[2]), grades)
-	return render_template('grades.html',
-		grades=grades,
-		total = total)
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

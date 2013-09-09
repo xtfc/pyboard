@@ -21,13 +21,15 @@
 			<nav>
 				{% block nav %}
 					<ul>
-						<li><a href="{{ url_for('index') }}">submit</a></li>
-						<li><a href="{{ url_for('emails') }}">emails</a></li>
-						<li><a href="{{ url_for('grades') }}">grades</a></li>
-						{% if 'username' in session %}
-							<li><a href="{{ url_for('profile') }}">{{ session['username'] }}</a></li>
-							<li><a href="{{ url_for('logout') }}">log out</a></li>
+						<li><a href="{{ url_for('users') }}">users</a></li>
+						{% if 'admin' == g.user.section %}
+							<li><a href="{{ url_for('admin') }}">admin</a></li>
+						{% else %}
+							<li><a href="{{ url_for('index') }}">submit</a></li>
+							<li><a href="{{ url_for('grades') }}">grades</a></li>
 						{% endif %}
+						<li><a href="{{ url_for('profile') }}">{{ g.user.username }}</a></li>
+						<li><a href="{{ url_for('logout') }}">log out</a></li>
 					</ul>
 				{% endblock %}
 			</nav>

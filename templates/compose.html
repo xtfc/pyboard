@@ -3,7 +3,7 @@
 	Compose {{ super() }}
 {% endblock %}
 {% block content %}
-	<form method="POST" action="/emails/to/{{ to }}">
+	<form method="POST" action="{{ url_for('email_to', to = to) }}">
 		<label for="from">From: </label><input type="text" name="from"><br>
 		<label for="subject">Subject: </label><input type="text" name="subject" size="50"><br>
 		<textarea name="body" rows="20"></textarea><br>

@@ -1,16 +1,19 @@
 {% extends "main.html" %}
 {% block title %}
-	{{ username }} {{ super() }}
+	{{ user.username }} {{ super() }}
 {% endblock %}
 {% block content %}
 	<ul>
-		<li>Username: {{ username }}</li>
+		<li>Username: {{ user.username }}</li>
 		<li>
-			Email: <a href="mailto:{{ info[0] }}">{{ info[0] }}</a>
-			{% if isuser %}<a href="{{ url_for('profile_edit') }}">(edit)</a>{% endif %}
+			Email: <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+			{% if g.user.username == user.username %}<a href="{{ url_for('profile_edit') }}">(edit)</a>{% endif %}
 		</li>
-		<li>Section {{ info[1] }}</li>
-		{% if admin %}<li style="font-weight: bold"><a href="{{ url_for('admin') }}">Administrator</a></li>{% endif %}
-		{% if isuser %}<li style="font-weight: bold">You</li>{% endif %}
+		{% if 'admin' == user.section %}
+			<li style="font-weight: bold"><a href="{{ url_for('admin') }}">Administrator</a></li>
+		{% else %}
+			<li>Section: {{ user.section }}</li>
+		{% endif %}
+		{% if g.user.username == user.username %}<li style="font-weight: bold">You</li>{% endif %}
 	</ul>
 {% endblock %}

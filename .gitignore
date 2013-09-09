@@ -2,7 +2,7 @@
 *.pyc
 venv/
 files/
-emails/
+users/
 grades/
 static/
 !static/main.css
