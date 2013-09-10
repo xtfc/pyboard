@@ -28,6 +28,7 @@
 							<li><a href="{{ url_for('index') }}">submit</a></li>
 							<li><a href="{{ url_for('grades') }}">grades</a></li>
 						{% endif %}
+						<li><a href="{{ url_for('announcements') }}">announcements</a></li>
 						<li><a href="{{ url_for('profile') }}">{{ g.user.username }}</a></li>
 						<li><a href="{{ url_for('logout') }}">log out</a></li>
 					</ul>

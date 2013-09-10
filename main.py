@@ -4,11 +4,13 @@ from flask import abort, redirect, session, flash, g
 from flask import render_template, url_for
 from flask import request
 from flask import send_file
+from flask import Markup
 from werkzeug import secure_filename
 
 # Python imports
 from datetime import datetime
 from functools import wraps
+from markdown import markdown
 import os
 import random
 import sha
@@ -241,6 +243,13 @@ def download(section, assignment):
 	if file_name is None:
 		return abort(404)
 	return send_file(file_name, as_attachment=True)
+
+@app.route('/announcements')
+@requires_login
+def announcements():
+	announcements = [Markup(markdown(open('announcements/'+a).read())) for a in sorted(os.listdir('announcements'))]
+	announcements.reverse()
+	return render_template('announcements.html', announcements=announcements)
 
 @app.route('/admin')
 @requires_admin

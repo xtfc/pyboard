@@ -1,0 +1,13 @@
+{% extends "main.html" %}
+{% block title %}
+	Announcements {{ super() }}
+{% endblock %}
+{% block content %}
+	{% for announcement in announcements %}
+		<div>
+			{{ announcement }}
+		</div>
+		-------------
+		<br />
+	{% endfor %}
+{% endblock %}
