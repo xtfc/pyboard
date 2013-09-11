@@ -93,6 +93,10 @@ def requires_admin(func):
 		return func(*args, **kwargs)
 	return wrapper
 
+def user_in_system(username):
+	users = os.listdir('users')
+	return username in users
+
 def validate_login(username, password):
 	server = serverconfig.ldap_server
 	con = ldap.initialize(server)
@@ -380,6 +384,9 @@ def login():
 		return render_template('login.html')
 	else:
 		if validate_login(request.form['username'], request.form['password']):
+			if not user_in_system(request.form['username']):
+				flash('User not in system')
+				return render_template('login.html')
 			session['username'] = request.form['username']
 			flash('Logged in')
 			return redirect(url_for('index'))
