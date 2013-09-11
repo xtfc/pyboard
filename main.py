@@ -266,7 +266,7 @@ def announcements_admin():
 		yous = []
 		users = [User(user) for user in sorted(os.listdir('users'))]
 		for user in users:
-			yous.append('philip.dexter@gmail.com')
+			yous.append(user.email)
 		email_body = 'There is a new announcement for CS 140. To view it visit '+\
 				'http://leiyu5.cs.binghamton.edu/announcements\n\nA (watered down) '+\
 				'version of the announcement can be previewed below\n\n--start-'+\
