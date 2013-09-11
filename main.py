@@ -304,7 +304,7 @@ def profile(username = None):
 		user.email = request.form['new_email']
 		user.write()
 
-		flash('Email updated to "' + info[0] + '"')
+		flash('Email updated to "' + user.email + '"')
 
 	return render_template('profile.html',
 		user = user,
