@@ -98,6 +98,9 @@ def user_in_system(username):
 	return username in users
 
 def validate_login(username, password):
+	# TODO ldap doesn't like empty passwords... find out why
+	if password == '':
+		password = ' '
 	server = serverconfig.ldap_server
 	con = ldap.initialize(server)
 	dn = serverconfig.make_dn(username)
