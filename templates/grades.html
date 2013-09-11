@@ -18,11 +18,13 @@
 				<td>{{ "%.1f"|format(grade[1] * 100.0 / grade[2]) }}%</td>
 			</tr>
 		{% endfor %}
+		{% if grades|length > 0 %}
 		<tr>
 			<th>Total</th>
 			<th>{{ total[1] }}</th>
 			<th>{{ total[2] }}</th>
 			<th>{{ "%.1f"|format(total[1] * 100.0 / total[2]) }}%</th>
 		</tr>
+		{% endif %}
 	</table>
 {% endblock %}

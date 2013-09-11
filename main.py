@@ -37,6 +37,12 @@ class User:
 		self.username = username.strip()
 		self.email = temp.readline().strip()
 		self.section = temp.readline().strip()
+		self.grades = sorted([line.strip().split('\t') for line
+			in temp if line.strip()])
+		self.total = ('', 0, 1)
+		if len(self.grades) > 0:
+			self.grades = map(lambda x: (x[0], int(x[1]), int(x[2])), self.grades)
+			self.total = reduce(lambda x, y: ('', x[1] + y[1], x[2] + y[2]), self.grades)
 		temp.close()
 
 	def write(self):
@@ -183,13 +189,12 @@ def get_submissions(section, assignment):
 	return "static/" + file_name
 
 def grades_for_user(username):
-	grades = sorted([line.strip().split('\t') for line
-		in open('grades/' + username) if line.strip()])
-	grades = map(lambda x: (x[0], int(x[1]), int(x[2])), grades)
-	total = reduce(lambda x, y: ('', x[1] + y[1], x[2] + y[2]), grades)
+	user = User(username)
+	if len(user.grades) == 0:
+		flash('No grades to view')
 	return render_template('grades.html',
-		grades=grades,
-		total = total)
+		grades=user.grades,
+		total=user.total)
 
 @app.before_request
 def before():

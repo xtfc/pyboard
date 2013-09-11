@@ -3,7 +3,6 @@
 venv/
 files/
 users/
-grades/
 announcements/
 static/
 !static/main.css
