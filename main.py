@@ -251,6 +251,34 @@ def announcements():
 	announcements.reverse()
 	return render_template('announcements.html', announcements=announcements)
 
+@app.route('/admin/announcements', methods=['GET', 'POST'])
+@requires_admin
+def announcements_admin():
+	if request.method == 'GET':
+		return render_template('announcements_create.html')
+	else:
+		announcement = request.form['announcement']
+		timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+		temp = open('announcements/' + timestamp, 'w')
+		temp.write(announcement)
+		temp.close()
+
+		yous = []
+		users = [User(user) for user in sorted(os.listdir('users'))]
+		for user in users:
+			yous.append('philip.dexter@gmail.com')
+		email_body = 'There is a new announcement for CS 140. To view it visit '+\
+				'http://leiyu5.cs.binghamton.edu/announcements\n\nA (watered down) '+\
+				'version of the announcement can be previewed below\n\n--start-'+\
+				'announcement--\n\n' + announcement
+		# TODO add the ability to send an html version of the announcement in the email
+		# see http://stackoverflow.com/questions/882712/sending-html-email-in-python#882770
+		send_email(you = yous,
+			subject = 'New announcement for CS 140',
+			body = email_body)
+
+		return redirect(url_for('announcements'))
+
 @app.route('/admin')
 @requires_admin
 def admin():

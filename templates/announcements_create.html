@@ -1,0 +1,10 @@
+{% extends "main.html" %}
+{% block title %}
+	New Announcement {{ super() }}
+{% endblock %}
+{% block content %}
+	<form method="POST" action="{{ url_for('announcements_admin') }}">
+		<textarea name="announcement" rows="20" style="width:100%"></textarea><br />
+		<input type="submit" />
+	</form>
+{% endblock %}
