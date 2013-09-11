@@ -1,0 +1,18 @@
+{% extends "main.html" %}
+{% block title %}
+	Download {{ super() }}
+{% endblock %}
+{% block content %}
+	<form method="POST" action="{{ url_for('download_admin') }}">
+		<label for="ass">Assignment: </label>
+		<select name="ass">
+			{% for item in assignments %}
+				<option value="{{ item }}">{{ item }}</option>
+			{% endfor %}
+		</select>
+		<br />
+		<label for="section">Section: </label><input name="section" type="text" size="3" />
+		<br />
+		<input type="submit" />
+	</form>
+{% endblock %}

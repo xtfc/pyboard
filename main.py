@@ -171,7 +171,7 @@ def handle_file(file_path):
 
 def get_submissions(section, assignment):
 	pdir = os.path.abspath(os.curdir)
-	dir = "files/" + "/" + section + "/" + assignment + "/"
+	dir = "files/" + section + "/" + assignment + "/"
 	try:
 		os.chdir(dir)
 	except:
@@ -241,13 +241,20 @@ def index():
 		return render_template('index.html', title='Submit',
 			assignments = assignments)
 
-@app.route('/download/<section>/<assignment>', methods=['GET', 'POST'])
+@app.route('/download', methods=['GET', 'POST'])
 @requires_admin
-def download(section, assignment):
-	file_name = get_submissions(section, assignment)
-	if file_name is None:
-		return abort(404)
-	return send_file(file_name, as_attachment=True)
+def download_admin():
+	if request.method == 'GET':
+		assignments = [line.strip() for line in open('assignments') if line.strip()]
+		assignments.reverse()
+		return render_template('download.html',
+			assignments=assignments)
+	else:
+		file_name = get_submissions(request.form['section'], request.form['ass'])
+		if file_name is None:
+			flash('Section or Assignment not found')
+			return abort(404)
+		return send_file(file_name, as_attachment=True)
 
 @app.route('/announcements')
 @requires_login
