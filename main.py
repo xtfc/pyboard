@@ -33,23 +33,56 @@ app.secret_key = serverconfig.app_secret_key
 
 class User:
 	def __init__(self, username):
-		temp = open('users/' + username)
 		self.username = username.strip()
-		self.email = temp.readline().strip()
-		self.section = temp.readline().strip()
-		self.grades = sorted([line.strip().split('\t') for line
-			in temp if line.strip()])
+		self.email = None
+		self.section = None
+		self.grades = []
 		self.total = ('', 0, 1)
+
+		try:
+			temp = open('users/' + username)
+		except:
+			flash('Error opening user file.')
+			abort(500)
+		else:
+			for line in temp:
+				# ignore blank/invalid lines
+				line = line.strip()
+				if not line: continue
+				if ' ' not in line: continue
+
+				key, val = line.split(' ', 1)
+				if key == 'email':
+					self.email = val
+				elif key == 'section':
+					self.section = val
+				elif key == 'grade':
+					self.grades.append(val.split('\t'))
+
+			temp.close()
+
+		if not self.email or not self.section:
+			flash('The user file "' + self.username + '" is not configured properly.')
+			abort(500)
+
 		if len(self.grades) > 0:
+			self.grades = sorted(self.grades, key = lambda x: x[0])
 			self.grades = map(lambda x: (x[0], int(x[1]), int(x[2])), self.grades)
 			self.total = reduce(lambda x, y: ('', x[1] + y[1], x[2] + y[2]), self.grades)
-		temp.close()
 
 	def write(self):
-		temp = open('users/' + self.username, 'w')
-		temp.write(self.email + '\n')
-		temp.write(self.section + '\n')
-		temp.close()
+		try:
+			temp = open('users/' + self.username, 'w')
+		except:
+			flash('Error opening user file.')
+			abort(500)
+		else:
+			temp.write('email {}\n'.format(self.email))
+			temp.write('section {}\n'.format(self.section))
+			for grade in self.grades:
+				temp.write('grade {}\t{}\t{}\n'.format(*grade))
+
+			temp.close()
 
 def send_email(me = None, you = None, subject = 'Notification', body = None):
 	if not me:
