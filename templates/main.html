@@ -26,6 +26,7 @@
 							<li><a href="{{ url_for('admin') }}">admin</a></li>
 						{% else %}
 							<li><a href="{{ url_for('index') }}">submit</a></li>
+							<li><a href="{{ url_for('view_submissions') }}">submissions</a></li>
 							<li><a href="{{ url_for('grades') }}">grades</a></li>
 						{% endif %}
 						<li><a href="{{ url_for('announcements') }}">announcements</a></li>

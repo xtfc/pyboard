@@ -1,0 +1,18 @@
+{% extends "main.html" %}
+{% block title %}
+	My Submissions {{ super() }}
+{% endblock %}
+{% block content %}
+	<ul>
+		{% for submission in submissions %}
+			<li>
+				{{ submission[0] }}
+				<ul>
+					{% for sub in submission[1] %}
+						<li><a href="{{ url_for('view_submissions', assignment=submission[0], timestamp=sub) }}">{{ sub }}</a></li>
+					{% endfor %}
+				</ul>
+			</li>
+		{% endfor %}
+	</ul>
+{% endblock %}

@@ -12,6 +12,7 @@ from datetime import datetime
 from functools import wraps
 from markdown import markdown
 import os
+import glob
 import random
 import sha
 import shutil
@@ -280,6 +281,37 @@ def index():
 		assignments.reverse()
 		return render_template('index.html', title='Submit',
 			assignments = assignments)
+
+@app.route('/mysubmissions')
+@requires_login
+def view_submissions():
+	assignment = request.args.get('assignment')
+	timestamp = request.args.get('timestamp')
+	username = session['username']
+	user = User(username)
+	if assignment is None or timestamp is None:
+		submissions = glob.glob('files/'+user.section+'/**/'+user.username)
+		if len(submissions) == 0:
+			flash('No submissions found')
+		else:
+			submissions = map(lambda x: (x.split('/')[2], os.listdir(x)), submissions)
+		return render_template('submissions.html', submissions=submissions)
+	else:
+		pdir = os.path.abspath(os.curdir)
+		dir = "files/" + user.section + "/" + assignment + "/" + user.username + "/" + timestamp
+		try:
+			os.chdir(dir)
+		except:
+			os.chdir(pdir)
+			return abort(404)
+		os.chdir('../..')
+		file_name = user.username + "_" + timestamp + ".tar.gz"
+		tar = tarfile.open(file_name, "w:gz")
+		tar.add(user.username + '/' + timestamp)
+		tar.close()
+		os.chdir(pdir)
+		shutil.move(dir + '/../../' + file_name, "static/" + file_name)
+		return send_file("static/" + file_name, as_attachment=True)
 
 @app.route('/download', methods=['GET', 'POST'])
 @requires_admin
