@@ -30,7 +30,7 @@ from email.mime.text import MIMEText
 import serverconfig
 
 app = Flask(__name__)
-app.secret_key = serverconfig.app_secret_key
+serverconfig.configure(app)
 
 class User:
 	def __init__(self, username):
@@ -87,14 +87,14 @@ class User:
 
 def send_email(me = None, you = None, subject = 'Notification', body = None):
 	if not me:
-		me = serverconfig.email_from
+		me = app.config['EMAIL_FROM']
 	if not you or not body:
 		return
 
 	if type(you) is str or type(you) is unicode:
 		you = [you]
 
-	message = MIMEText(body)
+	message = MIMEText(body, 'html')
 	message['Subject'] = subject
 	message['From'] = me
 	message['To'] = ', '.join(you)
@@ -135,9 +135,9 @@ def validate_login(username, password):
 	# TODO ldap doesn't like empty passwords... find out why
 	if password == '':
 		password = ' '
-	server = serverconfig.ldap_server
+	server = app.config['LDAP_SERVER']
 	con = ldap.initialize(server)
-	dn = serverconfig.make_dn(username)
+	dn = app.config['LDAP_DN'](username)
 	rv = con.simple_bind(dn, password)
 
 	try:
@@ -264,11 +264,12 @@ def index():
 		ufile.save(full_path)
 
 		num_submission = len(glob.glob('files/'+user.section+'/'+assignment+'/'+user.username+'/*'))
-		verification_code = sha.new(serverconfig.verification_salt + user.username + assignment + str(num_submission)).hexdigest()
+		verification_code = sha.new(app.config['VERIFICATION_SALT'] + user.username + assignment + str(num_submission)).hexdigest()
 		# FIXME template
 		send_email(you = user.email,
 			subject = 'Submission Received',
-			body = "Your submission for assignment `" + assignment + "' was received.\n\nYour confirmation code is " + verification_code)
+			body = render_template('email.html',
+				content = 'Your submission for assignment "' + assignment + '" was received.\n\nYour confirmation code is ' + verification_code))
 
 		output = handle_file(full_path)
 		return render_template('upload.html', title='Upload',
@@ -360,7 +361,8 @@ def announcements_admin():
 		# see http://stackoverflow.com/questions/882712/sending-html-email-in-python#882770
 		send_email(you = yous,
 			subject = 'New announcement for CS 140',
-			body = email_body)
+			body = render_template('email.html',
+				content = 'New announcement for ' + app.config['COURSE_NAME'] + '. Please visit ' + app.config['DOMAIN'] + url_for('announcements') + ' to view it in full.\n\n' + announcement))
 
 		return redirect(url_for('announcements'))
 

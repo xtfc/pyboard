@@ -1,6 +1,12 @@
-verification_salt = 'secret_salt'
-email_from = 'pyboard@yourdomain.com'
-app_secret_key = '-'
-ldap_server = "ldap://127.0.0.1:389"
-def make_dn(username):
-	return "cn=" + username + ",cn=users,dc=ldap,dc=ldap,dc=ldap"
+def configure(app):
+	app.config['COURSE_NAME'] = 'CS101'
+	app.config['DOMAIN'] = 'http://yourdomain.com'
+	app.config['EMAIL_FROM'] = 'pyboard@yourdomain.com'
+	app.config['VERIFICATION_SALT'] = ''
+	app.config['SECRET_KEY'] = ''
+	app.config['LDAP_SERVER'] = 'ldap://127.0.0.1:389'
+	app.config['LDAP_DN'] = lambda x: 'cn=' + x + ',cn=users,dc=ldap,dc=ldap,dc=ldap'
+
+	# FIXME need a way to autogenerate this
+	# somehow without cluttering the config
+	app.config['COMMIT'] = 'v0.1'

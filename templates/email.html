@@ -1,0 +1,15 @@
+<p>
+	{% block header %}
+		Message from course {{ config['COURSE_NAME'] }} - Pyboard
+	{% endblock %}
+</p>
+<p>
+	{% block content %}
+		{{ content|safe }}
+	{% endblock %}
+</p>
+<p>
+	{% block footer %}
+		Powered by <a href="https://github.com/philipdexter/pyboard">Pyboard</a> - {{ config['COMMIT'] }}
+	{% endblock %}
+</p>
