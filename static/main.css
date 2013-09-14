@@ -74,3 +74,9 @@ a:hover {
 h1, h2, h3, h4, h5, h6 {
 	text-align: center;
 }
+
+hr {
+	border-width: 0 0 1px 0;
+	border-color: #111;
+	border-style: solid;
+}

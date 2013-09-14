@@ -5,9 +5,8 @@
 {% block content %}
 	{% for announcement in announcements %}
 		<div>
-			{{ announcement }}
+			{{ announcement|safe }}
 		</div>
-		-------------
-		<br />
+		{% if not loop.last %}<hr>{% endif %}
 	{% endfor %}
 {% endblock %}

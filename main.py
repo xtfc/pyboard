@@ -333,7 +333,7 @@ def download_admin():
 @app.route('/announcements')
 @requires_login
 def announcements():
-	announcements = [Markup(markdown(open('announcements/'+a).read())) for a in sorted(os.listdir('announcements'))]
+	announcements = [markdown(open('announcements/'+a).read()) for a in sorted(os.listdir('announcements'))]
 	announcements.reverse()
 	return render_template('announcements.html', announcements=announcements)
 
