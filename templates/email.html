@@ -1,15 +1,15 @@
-<p>
-	{% block header %}
+{% block header %}
+	<p>
 		Message from course {{ config['COURSE_NAME'] }} - Pyboard
-	{% endblock %}
-</p>
-<p>
-	{% block content %}
+	</p>
+{% endblock %}
+{% block content %}
+	<p>
 		{{ content|safe }}
-	{% endblock %}
-</p>
-<p>
-	{% block footer %}
+	</p>
+{% endblock %}
+{% block footer %}
+	<p>
 		Powered by <a href="https://github.com/philipdexter/pyboard">Pyboard</a> - {{ config['COMMIT'] }}
-	{% endblock %}
-</p>
+	</p>
+{% endblock %}

@@ -86,6 +86,8 @@ class User:
 			temp.close()
 
 def send_email(me = None, you = None, subject = 'Notification', body = None):
+	# TODO send multipart messages instead of only HTML
+	# see http://stackoverflow.com/questions/882712/sending-html-email-in-python#882770
 	if not me:
 		me = app.config['EMAIL_FROM']
 	if not you or not body:
@@ -268,8 +270,9 @@ def index():
 		# FIXME template
 		send_email(you = user.email,
 			subject = 'Submission Received',
-			body = render_template('email.html',
-				content = 'Your submission for assignment "' + assignment + '" was received.\n\nYour confirmation code is ' + verification_code))
+			body = render_template('email_submission.html',
+				verification = verification_code,
+				assignment = assignment))
 
 		output = handle_file(full_path)
 		return render_template('upload.html', title='Upload',
@@ -345,6 +348,7 @@ def announcements_admin():
 	else:
 		announcement = request.form['announcement']
 		timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+
 		temp = open('announcements/' + timestamp, 'w')
 		temp.write(announcement)
 		temp.close()
@@ -353,16 +357,11 @@ def announcements_admin():
 		users = [User(user) for user in sorted(os.listdir('users'))]
 		for user in users:
 			yous.append(user.email)
-		email_body = 'There is a new announcement for CS 140. To view it visit '+\
-				'http://leiyu5.cs.binghamton.edu/announcements\n\nA (watered down) '+\
-				'version of the announcement can be previewed below\n\n--start-'+\
-				'announcement--\n\n' + announcement
-		# TODO add the ability to send an html version of the announcement in the email
-		# see http://stackoverflow.com/questions/882712/sending-html-email-in-python#882770
+
 		send_email(you = yous,
-			subject = 'New announcement for CS 140',
-			body = render_template('email.html',
-				content = 'New announcement for ' + app.config['COURSE_NAME'] + '. Please visit ' + app.config['DOMAIN'] + url_for('announcements') + ' to view it in full.\n\n' + announcement))
+			subject = 'New announcement for ' + app.config['COURSE_NAME'],
+			body = render_template('email_announcement.html',
+				announcement = markdown(announcement)))
 
 		return redirect(url_for('announcements'))
 

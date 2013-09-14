@@ -1,0 +1,12 @@
+{% extends "email.html" %}
+{% block content %}
+	<p>
+		{{ announcement|safe }}
+	</p>
+{% endblock %}
+{% block footer %}
+	<p>
+		<a href="{{ config['DOMAIN'] }}{{ url_for('announcements') }}">View all {{ config['COURSE_NAME'] }} announcements</a>
+	</p>
+	{{ super() }}
+{% endblock %}
