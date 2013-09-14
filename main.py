@@ -263,7 +263,8 @@ def index():
 		full_path = upload_dir + filename
 		ufile.save(full_path)
 
-		verification_code = sha.new(serverconfig.verification_salt + user.username + assignment).hexdigest()
+		num_submission = len(glob.glob('files/'+user.section+'/'+assignment+'/'+user.username+'/*'))
+		verification_code = sha.new(serverconfig.verification_salt + user.username + assignment + str(num_submission)).hexdigest()
 		# FIXME template
 		send_email(you = user.email,
 			subject = 'Submission Received',
