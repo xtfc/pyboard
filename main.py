@@ -411,25 +411,6 @@ def users():
 		title='Email List',
 		users=users)
 
-@app.route('/email/<to>', methods=['GET', 'POST'])
-def email_to(to):
-	if request.method == 'GET':
-		return render_template('compose.html', to=to)
-	else:
-		yous = []
-
-		users = [User(user) for user in sorted(os.listdir('users'))]
-		for user in users:
-			if to == 'a0' or to == user.section or user.section == 'admin':
-				yous.append(user.email)
-
-		send_email(me = request.form['from'],
-			you = yous,
-			subject = request.form['subject'],
-			body = request.form['body'])
-
-		return "message sent successfully"
-
 @app.route('/grades')
 @requires_login
 def grades():
