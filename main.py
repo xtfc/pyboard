@@ -68,7 +68,7 @@ class User:
 
 		if len(self.grades) > 0:
 			self.grades = sorted(self.grades, key = lambda x: x[0])
-			self.grades = map(lambda x: (x[0], int(x[1]), int(x[2])), self.grades)
+			self.grades = map(lambda x: (x[0], float(x[1]), float(x[2])), self.grades)
 			self.total = reduce(lambda x, y: ('', x[1] + y[1], x[2] + y[2]), self.grades)
 
 	def write(self):
