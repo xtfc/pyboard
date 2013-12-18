@@ -1,0 +1,10 @@
+{% extends "main.html" %}
+{% block content %}
+	<form enctype="multipart/form-data" action="/admin/putexcel" method="POST" onsubmit="return validate();" name="submission">
+		<input type="hidden" name="MAX_FILE_SIZE" value="5000000">
+
+		Choose xlsx grade file to upload: <input name="file" type="file"><br>
+
+		<input type="submit" value="Submit">
+	</form>
+{% endblock %}
