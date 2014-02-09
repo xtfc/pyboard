@@ -21,7 +21,6 @@ import smtplib
 import subprocess
 import tarfile
 import zipfile
-import sys
 try:
 	import ldap
 except:
@@ -30,10 +29,6 @@ from email.mime.text import MIMEText
 
 # Pyboard imports
 import serverconfig
-
-# import openpyxl
-from openpyxl import Workbook
-from openpyxl import load_workbook
 
 app = Flask(__name__)
 serverconfig.configure(app)
@@ -217,157 +212,6 @@ def handle_file(file_path):
 	os.chdir(pdir)
 
 	return return_string
-
-usr_dir = '/home/pdexter1/public_html/chalk/users/'
-xlsx_file = '/home/pdexter1/tmp/grade.xlsx' # this is xlsx file
-backup_dir = '/home/pdexter1/backup/' # this is dir which backup the previous record
-output_dir = '/home/pdexter1/public_html/chalk/users/'
-
-class quiz_name_Error(Exception):
-	pass
-class grade_row_Error(Exception):
-	pass
-class section_row_Error(Exception):
-	pass
-
-# Remove hidden files in file list, author JP
-def rm_hidden_file(file_list):
-    new_list = []
-    for file_name in file_list:
-	if('~' not in file_name and '.' not in file_name):
-	    new_list.append(file_name)
-    return new_list
-
-# Generate xlsx file from students file, author JP
-def to_xlsx():
-    sections = {}  # key is section number, value is worksheet obj
-    id_files = rm_hidden_file(os.listdir(usr_dir)) # remove files contain '.' or '~' in name
-    sec_quiz = {} # key is section number, value is a dictionary whose key is quiz name, value is column number
-    id_names = {} # key is section number, value is names list in that section
-
-    workbook = Workbook()
-
-    for id_file in id_files:
-        f = open(usr_dir + id_file, 'r')
-        for line in f:
-            item = line.split()
-            # check user_id and email
-            if(item[0] == 'email'):
-                continue
-            # class section
-            elif(item[0] == 'section'):
-		if(len(item) != 2):
-			raise section_row_Error
-                sec_name = item[1]
-                if(sec_name not in sections): # if section number not in sections, then create a new sheet for section
-                    worksheet = workbook.create_sheet(0)
-                    worksheet.title = sec_name
-                    sections[sec_name] = worksheet
-                    sec_quiz[sec_name] = {}
-                else:
-                    worksheet = sections[sec_name]
-                if(sec_name not in id_names):
-                    id_names[sec_name] = [id_file]
-                else:
-                    id_names[sec_name].append(id_file)
-            # fill in grade
-            elif(item[0] == 'grade'):
-		if(len(item) != 4):
-			raise grade_row_Error
-                quiz_name = item[1]
-                grade = item[2]
-		max_score = item[3]
-                if(quiz_name not in sec_quiz[sec_name]):
-                    sec_quiz[sec_name][quiz_name] = len(sec_quiz[sec_name]) + 1
-                    worksheet.cell(row = 0, column = sec_quiz[sec_name][quiz_name]).value = quiz_name + ' ' + max_score
-                worksheet.cell(row = len(id_names[sec_name]), column = sec_quiz[sec_name][quiz_name]).value = grade
-            # error
-            else:
-                print 'Should have no field called ' + item[0] #TODO it should goes to logs
-                id_file = ''
-                f.close()
-                break
-
-        if(id_file):
-            worksheet.cell(row = len(id_names[sec_name]), column = 0).value = id_file # fill in id
-        f.close()
-
-    workbook.save(xlsx_file)
-
-# Parse xlsx to grade files, author JP
-def from_xlsx():
-
-    wb = load_workbook(xlsx_file)
-    section_names = wb.get_sheet_names()
-
-    for section_name in section_names:
-        ws = wb.get_sheet_by_name(section_name)
-        end_row = ws.get_highest_row()
-        end_column = ws.get_highest_column()
-        quiz_names = []
-        for quiz_column in range(1, end_column):
-            quiz_names.append(str(ws.cell(row = 0, column = quiz_column).value))
-
-        for name_row in range(1, end_row):
-            file_name = str(ws.cell(row = name_row, column = 0).value)
-            f = open(output_dir + file_name, 'w')
-            f.write('email ' + file_name + '@binghamton.edu\n')
-            f.write('section ' + section_name + '\n')
-            for quiz_grade in range(1, len(quiz_names) + 1):
-                grade = str(ws.cell(row = name_row, column = quiz_grade).value)
-                name_max_score = quiz_names[quiz_grade - 1].split()
-		if(len(name_max_score) != 2):
-			raise quiz_name_Error
-                f.write('grade ' + name_max_score[0] + '\t' + grade + '\t' + name_max_score[1] + '\n')
-            f.close()
-
-# Download the grades, author JP
-@app.route('/admin/getexcel')
-@requires_admin
-def get_excel_file():
-	try:
-		to_xlsx()
-		return send_file(xlsx_file, as_attachment=True)
-	except section_row_Error:
-		e = 'The section format should be "section [section code]" '
-		return render_template('fail.html', ErrorType = e)
-	except grade_row_Error:
-		e = 'The grade format should be "grade [quiz name]	[grade]		[max grade]" '
-		return render_template('fail.html', ErrorType = e)
-	except:
-		e = sys.exc_info()[0]
-		return render_template('fail.html', ErrorType = e)
-
-# Upload the grades, author JP
-@app.route('/admin/putexcel', methods=['GET', 'POST'])
-@requires_admin
-def put_excel_file():
-	try:
-		if request.method == 'POST':
-			user = User(session['username'])
-			ufile = request.files['file']
-			filename = secure_filename(ufile.filename)
-
-			d = datetime.now()
-			time_stamp = d.strftime("%Y-%m-%d-%H-%M-%S")
-			os.system("tar czPf " + backup_dir + time_stamp + ".tar.gz " + output_dir)
-
-			ufile.save(xlsx_file)
-			from_xlsx()
-			return render_template('upload.html', title='Upload',
-				name = user.username,
-				filename = filename,
-				section = user.section,
-				assignment = 'all assignment',
-				output = 'The grade is overloaded by uploaded xlsx file')
-		else:
-			return render_template('upload_grade.html', title='Submit')
-	except quiz_name_Error:
-		e = 'The quiz name format should be "[quiz name] [max score]" '
-		return render_template('fail.html', ErrorType = e)
-	except:
-		e = sys.exc_info()[0]
-		return render_template('fail.html', ErrorType = e)
 
 def get_submissions(section, assignment):
 	pdir = os.path.abspath(os.curdir)
