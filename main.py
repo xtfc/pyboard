@@ -59,7 +59,10 @@ class User:
 				elif key == 'section':
 					self.section = val
 				elif key == 'grade':
-					self.grades.append(val.split('\t'))
+					val = val.split('\t')
+					if len(val) == 3:
+						val.append('')
+					self.grades.append(val)
 
 			temp.close()
 
@@ -69,7 +72,7 @@ class User:
 
 		if len(self.grades) > 0:
 			self.grades = sorted(self.grades, key = lambda x: x[0])
-			self.grades = map(lambda x: (x[0], float(x[1]), float(x[2])), self.grades)
+			self.grades = map(lambda x: (x[0], float(x[1]), float(x[2]), x[3]), self.grades)
 			self.total = reduce(lambda x, y: ('', x[1] + y[1], x[2] + y[2]), self.grades)
 
 	def write(self):

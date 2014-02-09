@@ -9,6 +9,7 @@
 			<th>Grade</th>
 			<th>Possible</th>
 			<th>Percent</th>
+			<th>Comments</th>
 		</tr>
 		{% for grade in grades %}
 			<tr>
@@ -16,6 +17,11 @@
 				<td>{{ grade[1] }}</td>
 				<td>{{ grade[2] }}</td>
 				<td>{{ "%.1f"|format(grade[1] * 100.0 / grade[2]) }}%</td>
+				{% if grade[3]|length > 0 %}
+					<td><a href="#" onClick="alert('{{ grade[3] }}')">+</a></td>
+				{% else %}
+					<td>-</td>
+				{% endif %}
 			</tr>
 		{% endfor %}
 		{% if grades|length > 0 %}
