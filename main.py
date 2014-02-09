@@ -11,6 +11,7 @@ from werkzeug import secure_filename
 from datetime import datetime
 from functools import wraps
 from markdown import markdown
+from itertools import ifilterfalse
 import os
 import glob
 import random
@@ -395,6 +396,9 @@ def grades_for_user(username):
 		grades=user.grades,
 		total=user.total)
 
+def retrieve_users():
+	return [User(user) for user in ifilterfalse(lambda x: x.startswith('.'), sorted(os.listdir('users')))]
+
 @app.before_request
 def before():
 	if 'username' in session:
@@ -510,7 +514,7 @@ def announcements_admin():
 		temp.close()
 
 		yous = []
-		users = [User(user) for user in sorted(os.listdir('users'))]
+		users = retrieve_users()
 		for user in users:
 			yous.append(user.email)
 
@@ -562,7 +566,7 @@ def profile_edit():
 @app.route('/users')
 @requires_login
 def users():
-	users = [User(user) for user in sorted(os.listdir('users'))]
+	users = retrieve_users()
 	return render_template('users.html',
 		title='Email List',
 		users=users)
@@ -577,7 +581,7 @@ def grades():
 @requires_admin
 def grades_admin(username = None):
 	if username is None:
-		users = [User(user) for user in sorted(os.listdir('users'))]
+		users = retrieve_users()
 		users = [user for user in users if user.section != 'admin']
 		return render_template('class_grades.html',
 			title = 'Class Grades',
