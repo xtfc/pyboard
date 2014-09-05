@@ -12,4 +12,7 @@ touch assignments
 echo "creating a default serverconfig.py..."
 cp serverconfig.py.example serverconfig.py
 
+echo "creating an assignments directory..."
+mkdir asses
+
 echo "done"

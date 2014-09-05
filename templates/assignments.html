@@ -1,0 +1,8 @@
+{% extends "main.html" %}
+{% block content %}
+	<ul>
+		{% for ass in assignments %}
+			<li><a href={{ url_for('assignments', which=ass) }}>{{ ass }}</a></li>
+		{% endfor %}
+	</ul>
+{% endblock %}

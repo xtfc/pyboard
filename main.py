@@ -340,6 +340,31 @@ def download_admin():
 			return abort(404)
 		return send_file(file_name, as_attachment=True)
 
+@app.route('/assignments')
+@app.route('/assignment/<which>')
+@requires_login
+def assignments(which = None):
+	if not which:
+		assignments = os.listdir('asses')
+		return render_template('assignments.html', assignments=assignments)
+	else:
+		infile = open('asses/'+which).readlines()
+		allowed = False
+		if g.user.section == 'admin':
+			allowed = True
+		else:
+			# temporary hack to allow new users with no section to view it anyways
+			if g.user.section == 'a5':
+				allowed = True
+			else:
+				starts = datetime(*map(int, infile[int(g.user.section[-1]) - 1].split('-')))
+				allowed = starts < datetime.now()
+		if allowed:
+			assignment = markdown(''.join(infile[4:]), extensions=['fenced_code'])
+		else:
+			assignment = markdown('no')
+		return render_template('assignment.html', assignment=assignment)
+
 @app.route('/announcements')
 @requires_login
 def announcements():

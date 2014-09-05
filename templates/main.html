@@ -23,6 +23,7 @@
 					{% if 'username' in session %}
 						<ul>
 							<li><a href="{{ url_for('users') }}">users</a></li>
+							<li><a href="{{ url_for('assignments') }}">assignments</a></li>
 							{% if 'admin' == g.user.section %}
 								<li><a href="{{ url_for('admin') }}">admin</a></li>
 							{% else %}
