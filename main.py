@@ -346,6 +346,7 @@ def download_admin():
 def assignments(which = None):
 	if not which:
 		assignments = os.listdir('asses')
+		assignments.remove('.git')
 		return render_template('assignments.html', assignments=assignments)
 	else:
 		infile = open('asses/'+which).readlines()
@@ -353,12 +354,8 @@ def assignments(which = None):
 		if g.user.section == 'admin':
 			allowed = True
 		else:
-			# temporary hack to allow new users with no section to view it anyways
-			if g.user.section == 'a5':
-				allowed = True
-			else:
-				starts = datetime(*map(int, infile[int(g.user.section[-1]) - 1].split('-')))
-				allowed = starts < datetime.now()
+			starts = datetime(*map(int, infile[int(g.user.section[-1]) - 1].split('-')))
+			allowed = starts < datetime.now()
 		if allowed:
 			assignment = markdown(''.join(infile[4:]), extensions=['fenced_code'])
 		else:
