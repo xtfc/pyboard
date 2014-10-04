@@ -345,7 +345,7 @@ def download_admin():
 @requires_login
 def assignments(which = None):
 	if not which:
-		assignments = os.listdir('asses')
+		assignments = sorted(os.listdir('asses'))
 		assignments.remove('.git')
 		return render_template('assignments.html', assignments=assignments)
 	else:
